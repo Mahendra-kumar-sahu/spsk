@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Unique Question Picker (Image → OCR)</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <style>
+    :root { --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb; --brand:#22d3ee; }
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(120deg,#0b1220,#0f172a,#0b1220);color:var(--text)}
+    .wrap{max-width:1000px;margin:40px auto;padding:20px}
+    .card{background:rgba(17,24,39,.75);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    h1{margin:0 0 14px;font-weight:800;letter-spacing:.2px}
+    p.sub{margin:0 0 20px;color:var(--muted)}
+    .row{display:grid;grid-template-columns:1fr;gap:16px}
+    .grid{display:grid;gap:16px;grid-template-columns:repeat(12,1fr)}
+    .card-sm{grid-column:span 12}
+    .controls{display:flex;flex-wrap:wrap;gap:12px}
+    input[type="file"],input[type="number"],select,button,textarea{border-radius:12px;border:1px solid rgba(255,255,255,.08);background:#0b1020;color:var(--text);padding:10px 12px}
+    input[type="number"]{width:120px}
+    button{cursor:pointer;background:linear-gradient(135deg,#22d3ee,#60a5fa);border:0;color:#001018;font-weight:700;box-shadow:0 6px 18px rgba(34,211,238,.25)}
+    button.secondary{background:transparent;border:1px dashed rgba(255,255,255,.2);color:var(--text)}
+    .pill{display:inline-flex;gap:6px;align-items:center;padding:6px 10px;border-radius:999px;background:rgba(34,211,238,.12);color:#c8f8ff;border:1px solid rgba(34,211,238,.3);font-size:12px}
+    .preview{max-height:320px;max-width:100%;object-fit:contain;border-radius:12px;border:1px solid rgba(255,255,255,.08)}
+    .cols{display:grid;gap:16px;grid-template-columns:1fr 1fr}
+    @media (max-width:900px){.cols{grid-template-columns:1fr}}
+    .list{display:grid;gap:10px}
+    .q{padding:12px;border-radius:12px;background:#0b1020;border:1px solid rgba(255,255,255,.06)}
+    .muted{color:var(--muted)}
+    .footer{margin-top:10px;display:flex;gap:10px;flex-wrap:wrap}
+    .loader{height:10px;border-radius:999px;background:#0b1020;border:1px solid rgba(255,255,255,.06);overflow:hidden}
+    .bar{height:100%;width:0;background:linear-gradient(90deg,#22d3ee,#60a5fa);transition:width .2s ease}
+    .small{font-size:12px}
+    .note{font-size:12px;color:#9ca3af}
+    textarea{min-height:180px;width:100%;resize:vertical}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Unique Question Picker <span class="pill">Image ➜ OCR ➜ Random</span></h1>
+      <p class="sub">Upload a questions image (like an exam sheet). Enter how many questions you want, and this tool will OCR the image and randomly pick that many questions.</p>
+
+      <div class="row">
+        <div class="controls">
+          <input id="img" type="file" accept="image/*"/>
+          <input id="count" type="number" min="1" value="5"/>
+          <select id="lang">
+            <option value="eng" selected>English (eng)</option>
+            <option value="eng+hin">English + Hindi (eng+hin)</option>
+          </select>
+          <button id="run">Extract & Pick</button>
+          <button id="copy" class="secondary">Copy Selected</button>
+          <button id="download" class="secondary">Download .txt</button>
+          <button id="refresh" class="secondary">Refresh</button>
+        </div>
+
+        <div class="grid">
+          <div class="card-sm" style="grid-column:span 5">
+            <h3>Preview</h3>
+            <img id="preview" class="preview" alt="preview"/>
+            <div class="loader" style="margin-top:12px"><div class="bar" id="bar"></div></div>
+            <div class="note" id="status">Waiting for image…</div>
+          </div>
+
+          <div class="card-sm" style="grid-column:span 7">
+            <h3>Extracted Text (editable)</h3>
+            <textarea id="ocrText" placeholder="OCR text will appear here so you can fix mistakes if needed."></textarea>
+            <div class="footer small">Tip: Ensure each question starts with a label like <b>Q1.</b>, <b>Q2)</b> etc. This makes splitting accurate.</div>
+          </div>
+        </div>
+
+        <div class="cols">
+          <div>
+            <h3>Detected Questions</h3>
+            <div id="detected" class="list"></div>
+          </div>
+          <div>
+            <h3>Uniquely Selected</h3>
+            <div id="selected" class="list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="note" style="margin-top:16px">Notes: Works fully in-browser using <b>Tesseract.js</b> (no backend needed). For Hindi, choose “English + Hindi”. Quality depends on image clarity.</p>
+  </div>
+
+<script>
+  const imgInput = document.getElementById('img');
+  const preview = document.getElementById('preview');
+  const bar = document.getElementById('bar');
+  const statusEl = document.getElementById('status');
+  const runBtn = document.getElementById('run');
+  const countInput = document.getElementById('count');
+  const langSel = document.getElementById('lang');
+  const ocrText = document.getElementById('ocrText');
+  const detected = document.getElementById('detected');
+  const selected = document.getElementById('selected');
+  const copyBtn = document.getElementById('copy');
+  const dlBtn = document.getElementById('download');
+  const refreshBtn = document.getElementById('refresh');
+
+  // preview image
+  imgInput.addEventListener('change', () => {
+    const f = imgInput.files?.[0];
+    if(!f){ preview.src = ''; statusEl.textContent='Waiting for image…'; return; }
+    preview.src = URL.createObjectURL(f);
+    statusEl.textContent = 'Ready. Click “Extract & Pick”.';
+  });
+
+  // Main: OCR + split + random pick
+  runBtn.addEventListener('click', async () => {
+    if(!imgInput.files?.length && !ocrText.value.trim()){
+      alert('Please upload an image or paste text in the OCR box.');
+      return;
+    }
+
+    let text = ocrText.value.trim();
+
+    if(!text){
+      const file = imgInput.files[0];
+      bar.style.width = '0%';
+      statusEl.textContent = 'Running OCR…';
+      const worker = await Tesseract.createWorker(langSel.value, 1, {
+        logger: m => {
+          if(m.status === 'recognizing text' && m.progress){
+            bar.style.width = Math.round(m.progress * 100) + '%';
+          }
+        }
+      });
+      const { data } = await worker.recognize(file);
+      await worker.terminate();
+      text = (data.text || '').replace(/\u00a0/g,' ').trim();
+      ocrText.value = text;
+      statusEl.textContent = 'OCR complete. Review text if needed, then run again to re-pick.';
+    }
+
+    const questions = splitQuestions(text);
+    renderList(detected, questions);
+
+    if(!questions.length){
+      selected.innerHTML = `<div class="q muted">No questions detected. Ensure each question starts with Q1., Q2), etc.</div>`;
+      return;
+    }
+
+    const n = Math.max(1, Math.min(parseInt(countInput.value||'1',10), questions.length));
+    const picks = pickRandom(questions, n);
+    renderList(selected, picks, true);
+
+    if(n < parseInt(countInput.value,10)){
+      alert(`Only ${questions.length} questions found. Showing ${n}.`);
+    }
+  });
+
+  copyBtn.addEventListener('click', () => {
+    const text = [...document.querySelectorAll('#selected .q')].map(el=>el.dataset.raw).join('\n\n');
+    if(!text){ alert('Nothing to copy yet.'); return; }
+    navigator.clipboard.writeText(text);
+  });
+
+  dlBtn.addEventListener('click', () => {
+    const text = [...document.querySelectorAll('#selected .q')].map(el=>el.dataset.raw).join('\n\n');
+    if(!text){ alert('Nothing to download yet.'); return; }
+    const blob = new Blob([text], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'random-questions.txt'; a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  refreshBtn.addEventListener('click', () => {
+    imgInput.value = '';
+    preview.src = '';
+    bar.style.width = '0%';
+    statusEl.textContent = 'Waiting for image…';
+    ocrText.value = '';
+    detected.innerHTML = '';
+    selected.innerHTML = '';
+  });
+
+  // --- helpers ---
+  function renderList(container, items, withIndex=false){
+    container.innerHTML = '';
+    items.forEach((q,i) => {
+      const div = document.createElement('div');
+      div.className = 'q';
+      div.dataset.raw = q;
+      div.innerHTML = withIndex ? `<b>Q${i+1}.</b> ${escapeHtml(q)}` : escapeHtml(q);
+      container.appendChild(div);
+    });
+  }
+
+  function pickRandom(arr, n){
+    const a = [...arr];
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a.slice(0,n);
+  }
+
+  // Try multiple patterns to split questions robustly
+  function splitQuestions(text){
+    const clean = text.replace(/\r/g,'').replace(/[\t ]+/g,' ').trim();
+
+    // Prefer explicit Q-number markers
+    const byQ = clean.split(/(?=\bQ\s*\d+[\.)]\s*)/i).map(s=>s.trim()).filter(s=>s.length>0);
+
+    let parts = [];
+    if(byQ.length > 1){
+      // Remove the leading Qx. token but keep the content
+      parts = byQ.map(s => s.replace(/^Q\s*\d+[\.)]\s*/i,'').trim());
+    } else {
+      // Fallback 1: lines ending with question mark or colon
+      parts = clean.split(/(?<=[\?\:])\s*(?=[A-Z0-9])/).map(s=>s.trim());
+      // Fallback 2: split by numbered bullets like 1., 2)
+      if(parts.length <= 1){
+        parts = clean.split(/(?=\b\d+[\.)]\s+)/).map(s=>s.trim());
+      }
+    }
+
+    // Post-process: drop empties, very short fragments
+    parts = parts.filter(x => x && x.replace(/[^A-Za-z0-9\u0900-\u097F]/g,'').length > 6);
+
+    // Fix common OCR joins: merge lines when a part is too short and next starts lowercase
+    const merged = [];
+    for(let i=0;i<parts.length;i++){
+      const cur = parts[i];
+      const next = parts[i+1];
+      if(next && /^(and|or|\w)/.test(next) && cur.length < 30){
+        merged.push(cur + ' ' + next);
+        i++;
+      } else {
+        merged.push(cur);
+      }
+    }
+    return merged.map(s => s.trim());
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+  }
+</script>
+</body>
+</html>

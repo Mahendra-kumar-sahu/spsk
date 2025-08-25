@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Question Paper Builder | Samarth Public School</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- html2pdf bundle -->
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+
+<style>
+  .sheet {
+    width: 210mm; min-height: 297mm;
+    background: #fff; color:#111; 
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  .sheet-inner{ padding: 18mm 18mm 22mm 18mm; }
+  .page-break { page-break-before: always; }
+  @media print{
+    body{ background:#fff; }
+    .no-print{ display:none !important; }
+    .sheet{ box-shadow:none; }
+  }
+  .paper-h1{ font-weight:700; letter-spacing:.3px; }
+  .dots { flex:1; border-bottom:1px dotted #000; margin:0 6px; height:1.2em; }
+  .sec-title{ font-weight:700; }
+  .q-item{ margin:8px 0; line-height:1.45; }
+  #paper { background: white; color: black; }
+</style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 text-gray-100 min-h-screen">
+
+  <!-- NAV -->
+  <header class="no-print sticky top-0 z-40 backdrop-blur bg-black/20 border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="spsk1.png" class="w-8 h-8 rounded bg-white p-1"/>
+        <span class="font-semibold">Samarth Public School</span>
+      </div>
+      <nav class="text-sm opacity-90">Question Paper Builder</nav>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="max-w-7xl mx-auto px-6 py-8">
+    <!-- Form -->
+    <section class="no-print rounded-2xl p-6 bg-white/10 backdrop-blur border border-white/10 shadow-xl">
+      <h2 class="text-xl font-semibold mb-4">Paper Settings</h2>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <label class="block">
+          <span class="text-sm text-gray-300">School Name</span>
+          <input id="sch" class="mt-1 w-full px-3 py-2 rounded-lg bg-black/40 border border-white/10" value="SAMARTH PUBLIC SCHOOL KHATI">
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-300">Exam Title</span>
+          <input id="exam" class="mt-1 w-full px-3 py-2 rounded-lg bg-black/40 border border-white/10" value="ANNUAL SUPPLY EXAMINATION 2024 - 25">
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-300">Subject</span>
+          <input id="subject" class="mt-1 w-full px-3 py-2 rounded-lg bg-black/40 border border-white/10" value="Science">
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-300">Class</span>
+          <input id="klass" class="mt-1 w-full px-3 py-2 rounded-lg bg-black/40 border border-white/10" value="6th">
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-300">Max Marks</span>
+          <input id="marks" class="mt-1 w-full px-3 py-2 rounded-lg bg-black/40 border border-white/10" value="70">
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-300">Duration</span>
+          <input id="duration" class="mt-1 w-full px-3 py-2 rounded-lg bg-black/40 border border-white/10" placeholder="3 Hours">
+        </label>
+      </div>
+
+      <!-- Sections Builder -->
+      <div class="mt-8">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold">Sections</h3>
+          <div class="flex gap-2">
+            <button id="addSec" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-sky-400 to-indigo-400 text-black font-semibold">+ Add Section</button>
+            <button id="clearAll" class="px-3 py-1.5 rounded-lg border border-white/20">Clear</button>
+          </div>
+        </div>
+        <div id="secWrap" class="space-y-5"></div>
+      </div>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <button id="generate" class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 font-bold text-black shadow-lg">Generate Preview</button>
+        <button id="download" class="px-4 py-2 rounded-xl border border-white/20">Download PDF</button>
+        <button id="demo" class="px-4 py-2 rounded-xl border border-white/20">Fill Demo Data</button>
+      </div>
+    </section>
+
+    <!-- Preview -->
+    <section id="previewWrap" class="mt-10 hidden flex-col items-center gap-4">
+      <h2 class="no-print text-lg font-semibold">Paper Preview (A4)</h2>
+      <div id="paper" class="sheet">
+        <div class="sheet-inner" id="paperInner"></div>
+      </div>
+      <!-- <button id="download" class="mt-4 px-4 py-2 rounded-xl bg-gradient-to-r from-green-400 to-emerald-500 font-bold text-black shadow-lg hidden">
+        Download PDF
+      </button> -->
+    </section>
+  </main>
+
+<script>
+const $ = s => document.querySelector(s);
+const secWrap = $("#secWrap");
+const paperInner = $("#paperInner");
+
+function sectionTemplate(idx=1){
+  return `
+  <div class="p-4 rounded-xl bg-black/30 border border-white/10">
+    <div class="flex items-center justify-between">
+      <div class="text-sm text-gray-300">Section <span class="font-semibold">#<span class="idx">${idx}</span></span></div>
+      <div class="flex gap-2">
+        <button class="dup px-2 py-1 rounded border border-white/20 text-xs">Duplicate</button>
+        <button class="del px-2 py-1 rounded border border-white/20 text-xs">Remove</button>
+      </div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-3 mt-3">
+      <label class="block">
+        <span class="text-xs text-gray-300">Heading</span>
+        <input class="sec-title-input mt-1 w-full px-3 py-2 rounded bg-black/40 border border-white/10">
+      </label>
+      <label class="block">
+        <span class="text-xs text-gray-300">Instruction</span>
+        <input class="sec-inst-input mt-1 w-full px-3 py-2 rounded bg-black/40 border border-white/10">
+      </label>
+    </div>
+    <label class="block mt-3">
+      <span class="text-xs text-gray-300">Questions (one per line)</span>
+      <textarea class="sec-qs-input mt-1 w-full min-h-[150px] px-3 py-2 rounded bg-black/40 border border-white/10"></textarea>
+    </label>
+  </div>`;
+}
+
+function refreshIndices(){
+  [...secWrap.querySelectorAll(".idx")].forEach((s,i)=>s.textContent = i+1);
+}
+function addSection(prefill){
+  const div = document.createElement('div');
+  div.innerHTML = sectionTemplate(secWrap.children.length+1);
+  const el = div.firstElementChild;
+  secWrap.appendChild(el);
+  el.querySelector(".del").onclick = () => { el.remove(); refreshIndices(); };
+  el.querySelector(".dup").onclick = () => {
+    const copy = el.cloneNode(true);
+    secWrap.insertBefore(copy, el.nextSibling);
+    copy.querySelector(".del").onclick = () => { copy.remove(); refreshIndices(); };
+    copy.querySelector(".dup").onclick = () => {};
+    refreshIndices();
+  };
+  if(prefill){
+    el.querySelector(".sec-title-input").value = prefill.title || "";
+    el.querySelector(".sec-inst-input").value  = prefill.inst  || "";
+    el.querySelector(".sec-qs-input").value    = (prefill.qs||[]).join("\n");
+  }
+  return el;
+}
+
+function renderHeader(){
+  const school   = $("#sch").value.trim();
+  const exam     = $("#exam").value.trim();
+  const subject  = $("#subject").value.trim();
+  const klass    = $("#klass").value.trim();
+  const marks    = $("#marks").value.trim();
+  const duration = $("#duration").value.trim();
+
+  return `
+  <div class="text-center">
+    <div class="paper-h1 text-lg">${school}</div>
+    <div class="text-[12.5px] mt-0.5">${exam}</div>
+    <div class="text-[12.5px] mt-1 flex justify-between">
+      <div>Subject: <b>${subject}</b></div>
+      <div>Class: <b>${klass}</b></div>
+    </div>
+  </div>
+  <div class="flex items-center text-[12.5px] mt-2">
+    <div>Name</div><div class="dots"></div>
+    <div class="ml-6">Roll No.</div><div class="dots"></div>
+    <div class="ml-6">Marks: <b>${marks}</b></div>
+    ${duration ? `<div class="ml-6">Time: <b>${duration}</b></div>` : ``}
+  </div>
+  <hr class="my-3 border-t border-black/20">`;
+}
+
+function parseSections(){
+  const out = [];
+  secWrap.querySelectorAll(".p-4.rounded-xl").forEach(card=>{
+    const title = card.querySelector(".sec-title-input").value.trim();
+    const inst  = card.querySelector(".sec-inst-input").value.trim();
+    const qsRaw = card.querySelector(".sec-qs-input").value.trim();
+    const qs = qsRaw ? qsRaw.split(/\n+/).map(s=>s.trim()).filter(Boolean) : [];
+    if(title || qs.length) out.push({title, inst, qs});
+  });
+  return out;
+}
+function renderSections(sections){
+  let html = ``;
+  sections.forEach((s,si)=>{
+    html += `<div class="mb-4">
+      <div class="sec-title text-[13.5px]">${si+1}) ${s.title || 'Section ' + (si+1)}</div>
+      ${s.inst ? `<div class="text-[12px] italic mt-0.5">${s.inst}</div>`:``}
+      <ol class="mt-2 pl-5">
+        ${s.qs.map((q,qi)=>`<li class="q-item text-[13px]">(${qi+1}) ${q}</li>`).join('')}
+      </ol>
+    </div>`;
+  });
+  return html;
+}
+function generate(){
+  const secs = parseSections();
+  const header = renderHeader();
+  paperInner.innerHTML = header + renderSections(secs);
+  document.getElementById("previewWrap").classList.remove("hidden");
+  localStorage.setItem('qp_state', JSON.stringify({
+    sch:$("#sch").value, exam:$("#exam").value, subject:$("#subject").value,
+    klass:$("#klass").value, marks:$("#marks").value, duration:$("#duration").value,
+    secs
+  }));
+}
+function downloadPDF(){
+  generate(); // ensure content is updated
+  const el = document.getElementById('paper');
+  const opt = {
+    margin:[10,10,15,10],
+    filename:'question-paper.pdf',
+    image:{ type:'jpeg', quality:0.98 },
+    html2canvas:{ scale:2, useCORS:true, windowWidth: el.scrollWidth },
+    jsPDF:{ unit:'mm', format:'a4', orientation:'portrait' },
+    pagebreak:{ mode:['css','legacy'] }
+  };
+  setTimeout(()=>{ html2pdf().set(opt).from(el).save(); }, 500);
+}
+
+document.getElementById('addSec').onclick = ()=>{ addSection(); refreshIndices(); };
+document.getElementById('clearAll').onclick = ()=>{ secWrap.innerHTML=""; refreshIndices(); };
+document.getElementById('generate').onclick = generate;
+document.getElementById('download').onclick = downloadPDF;
+document.getElementById('demo').onclick = ()=>{ secWrap.innerHTML=""; addSection({title:"Demo Section",qs:["Q1","Q2"]}); generate(); };
+
+window.addEventListener('DOMContentLoaded', ()=>{ addSection(); refreshIndices(); });
+</script>
+</body>
+</html>

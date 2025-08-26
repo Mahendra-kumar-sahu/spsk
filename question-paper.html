@@ -17,9 +17,16 @@
   .sheet-inner{ padding: 18mm 18mm 22mm 18mm; }
   .page-break { page-break-before: always; }
   @media print{
-    body{ background:#fff; }
+    body {
+    background: #fff !important;
+    margin: 0;
+  }
     .no-print{ display:none !important; }
-    .sheet{ box-shadow:none; }
+    .sheet { box-shadow:none; 
+      margin: 0 auto;
+      
+      margin-top: 0 !important; 
+    padding-top: 0 !important; }
   }
   .paper-h1{ font-weight:700; letter-spacing:.3px; }
   .dots { flex:1; border-bottom:1px dotted #000; margin:0 6px; height:1.2em; }
@@ -247,4 +254,5 @@ window.addEventListener('DOMContentLoaded', ()=>{ addSection(); refreshIndices()
 </script>
 </body>
 </html>
+
 

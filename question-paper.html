@@ -205,12 +205,13 @@ function renderSections(sections){
       <div class="sec-title text-[13.5px]">${si+1}) ${s.title || 'Section ' + (si+1)}</div>
       ${s.inst ? `<div class="text-[12px] italic mt-0.5">${s.inst}</div>`:``}
       <ol class="mt-2 pl-5">
-        ${s.qs.map((q,qi)=>`<li class="q-item text-[13px]">(${qi+1}) ${q}</li>`).join('')}
+        ${s.qs.map((q)=>`<li class="q-item text-[13px]">${q}</li>`).join('')}
       </ol>
     </div>`;
   });
   return html;
 }
+
 function generate(){
   const secs = parseSections();
   const header = renderHeader();
@@ -246,3 +247,4 @@ window.addEventListener('DOMContentLoaded', ()=>{ addSection(); refreshIndices()
 </script>
 </body>
 </html>
+

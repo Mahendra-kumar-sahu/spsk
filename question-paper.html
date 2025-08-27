@@ -175,7 +175,7 @@ function sectionTemplate(idx=1){
 }
 
 function refreshIndices(){
-  [...secWrap.querySelectorAll(".idx")].forEach((s,i)=>s.textContent = i+1);
+  [...secWrap.querySelectorAll(".idx")].forEach((s,i)=>s.textContent = i);
 }
 function addSection(prefill){
   const div = document.createElement('div');
@@ -302,3 +302,4 @@ window.addEventListener('DOMContentLoaded', ()=>{ addSection(); refreshIndices()
 </script>
 </body>
 </html>
+

@@ -94,9 +94,12 @@
 
       <div class="grid md:grid-cols-2 gap-4">
         <label class="block">
-          <span class="text-sm text-gray-300">School Name</span>
-          <input id="sch" class="mt-1 w-full px-3 py-2 rounded-lg bg-black/40 border border-white/10" value="SAMARTH PUBLIC SCHOOL KHATI">
-        </label>
+  <span class="text-sm text-gray-300">School Name</span>
+  <input id="sch" 
+    class="mt-1 w-full px-3 py-2 rounded-lg bg-black/40 border border-white/10" 
+    value="SAMARTH PUBLIC SCHOOL KHATI" readonly>
+</label>
+
         <label class="block">
           <span class="text-sm text-gray-300">Exam Title</span>
           <input id="exam" class="mt-1 w-full px-3 py-2 rounded-lg bg-black/40 border border-white/10" value="ANNUAL SUPPLY EXAMINATION 2024 - 25">
@@ -204,7 +207,7 @@ function addSection(prefill){
 }
 
 function renderHeader(){
-  const school   = $("#sch").value.trim();
+  const school   = "SAMARTH PUBLIC SCHOOL KHATI"; // 👈 fixed
   const exam     = $("#exam").value.trim();
   const subject  = $("#subject").value.trim();
   const klass    = $("#klass").value.trim();
@@ -228,6 +231,7 @@ function renderHeader(){
   </div>
   <hr class="my-3 border-t border-black/20">`;
 }
+
 
 function parseSections(){
   const out = [];

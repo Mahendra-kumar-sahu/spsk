@@ -175,11 +175,11 @@ function sectionTemplate(idx=1){
 }
 
 function refreshIndices(){
-  [...secWrap.querySelectorAll(".idx")].forEach((s,i)=>s.textContent = i);
+  [...secWrap.querySelectorAll(".idx")].forEach((s,i)=>s.textContent = i+1);
 }
 function addSection(prefill){
   const div = document.createElement('div');
-  div.innerHTML = sectionTemplate(secWrap.children.length);
+  div.innerHTML = sectionTemplate(secWrap.children.length+1);
   const el = div.firstElementChild;
   secWrap.appendChild(el);
   el.querySelector(".del").onclick = () => { el.remove(); refreshIndices(); };
@@ -238,13 +238,14 @@ function parseSections(){
 function renderSections(sections){
   let html = ``;
   sections.forEach((s,si)=>{
-    html += `<div class="mb-4">
-      <div class="sec-title text-[13.5px]">${si+1}) ${s.title || 'Section ' + (si+1)}</div>
-      ${s.inst ? `<div class="text-[12px] italic mt-0.5">${s.inst}</div>`:``}
-      <ol class="mt-2 pl-5">
-        ${s.qs.map((q)=>`<li class="q-item text-[13px]">${q}</li>`).join('')}
-      </ol>
-    </div>`;
+   html += `<div class="mb-4">
+  <div class="sec-title text-[13.5px]">${s.title || ''}</div>
+  ${s.inst ? `<div class="text-[12px] italic mt-0.5">${s.inst}</div>`:``}
+  <ol class="mt-2 pl-5">
+    ${s.qs.map((q)=>`<li class="q-item text-[13px]">${q}</li>`).join('')}
+  </ol>
+</div>`;
+
   });
   return html;
 }
@@ -302,5 +303,3 @@ window.addEventListener('DOMContentLoaded', ()=>{ addSection(); refreshIndices()
 </script>
 </body>
 </html>
-
-

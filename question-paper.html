@@ -306,6 +306,7 @@ function renderSections(sections){
 function generate(){
   const secs = parseSections();
   const header = renderHeader();
+  
   paperInner.innerHTML = header + renderSections(secs);
 
   insertPageBreaks(); // <-- ensure page breaks added
@@ -360,16 +361,24 @@ function downloadLandscapePDF(){
   };
   setTimeout(()=>{ html2pdf().set(opt).from(el).save(); }, 500);
 }
+
+function generatePortrait(){
+  const paper = document.getElementById('paper');
+  paper.classList.remove('landscape');  // landscape hata do
+  generate(); // portrait render kare
+}
+
 function generateLandscape(){
   const paper = document.getElementById('paper');
-  paper.classList.add('landscape');
-  setTimeout(() => generate(), 100);
+  paper.classList.add('landscape');  // landscape add karo
+  generate(); // landscape render kare
 }
 
 document.getElementById('addSec').onclick = ()=>{ addSection(); refreshIndices(); };
 document.getElementById('clearAll').onclick = ()=>{ secWrap.innerHTML=""; refreshIndices(); };
-document.getElementById('generate').onclick = generate;
+document.getElementById('generate').onclick = generatePortrait;
 document.getElementById('generateLandscape').onclick = generateLandscape;
+
 document.getElementById('download').onclick = downloadPDF;
 document.getElementById('downloadLandscape').onclick = downloadLandscapePDF;
 document.getElementById('demo').onclick = ()=>{ secWrap.innerHTML=""; addSection({title:"Demo Section",qs:["Q1","Q2"]}); generate(); };

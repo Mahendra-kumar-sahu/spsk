@@ -11,7 +11,7 @@
 <style>
   /* Ensure content breaks properly */
 .q-item, .sec-title, .sheet-inner {
-  page-break-inside: avoid;
+  page-break-inside: always;
 }
 .q-item {
   margin:8px 0;
@@ -27,6 +27,14 @@
   padding-top: 0;
 }
 
+.sheet.landscape .sheet-inner {
+  column-count: 2;
+  column-gap: 5mm;
+  column-fill: auto;
+  column-rule: 1px solid #000;
+  height: 100%;
+  padding-top: 6mm; 
+}
 
   .sheet {
     width: 210mm; 
@@ -36,7 +44,18 @@
     box-shadow: 0 10px 30px rgba(0,0,0,.35);
     margin: auto;
   }
-
+.sheet.landscape {
+  width: 297mm; 
+  height: 210mm;
+  overflow: hidden;
+}
+.sheet.landscape .sheet-inner {
+  column-count: 2;
+  column-gap: 5mm;
+  column-fill: auto;
+  column-rule: 1px solid #000;
+  height: 100%;
+}
 
   .sheet-inner{ padding: 8mm 18mm 18mm 18mm;
    }
@@ -66,6 +85,15 @@
    
   }
 
+/* Landscape pages */
+.sheet.landscape {
+  page: landscape;
+}
+
+@page landscape {
+  size: A4 landscape;
+  margin: 0 !important;
+}
   .paper-h1{ font-weight:700; letter-spacing:.3px; }
   .dots { flex:1; border-bottom:1px dotted #000; margin:0 6px; height:1.2em; }
   .sec-title{ font-weight:700; }
@@ -135,8 +163,10 @@
       </div>
 
       <div class="mt-6 flex flex-wrap gap-3">
-        <button id="generate" class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 font-bold text-black shadow-lg">Generate Preview</button>
-        <button id="download" class="px-4 py-2 rounded-xl border border-white/20">Download PDF</button>
+        <button id="generate" class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 font-bold text-black shadow-lg">Portrait Preview</button>
+        <button id="generateLandscape" class="px-4 py-2 rounded-xl bg-purple-600 text-white">Landscape Preview</button>
+        <button id="download" class="px-4 py-2 rounded-xl border border-white/20">Portrait PDF</button>
+         <button id="downloadLandscape" class="px-4 py-2 rounded-xl bg-orange-600 text-white">Landscape PDF</button>
         <button id="demo" class="px-4 py-2 rounded-xl border border-white/20">Fill Demo Data</button>
       </div>
     </section>
@@ -213,8 +243,23 @@ function renderHeader(){
   const klass    = $("#klass").value.trim();
   const marks    = $("#marks").value.trim();
   const duration = $("#duration").value.trim();
-
-  return `
+const isLandscape = document.getElementById('paper').classList.contains('landscape');
+  if(isLandscape){
+    return `
+<div style="text-align:center;margin-bottom:10px;break-inside:avoid;">
+  <div style="font-weight:700;font-size:18px;margin:0;">${school}</div>
+  <div style="font-size:12.5px;margin-top:2px;">${exam}</div>
+  <div style="font-size:12.5px;margin-top:2px;">
+    <div>Subject: <b>${subject}</b> | Class: <b>${klass}</b></div>
+  </div>
+  <div style="font-size:12.5px;margin-top:4px;">
+    <div>Name: _____________ Roll No.: _______ Marks: <b>${marks}</b> ${duration ? `Time: <b>${duration}</b>` : ``}</div>
+  </div>
+  <hr style="margin:8px 0;border-top:1px solid rgba(0,0,0,0.2);">
+</div>`;
+  }  
+else{
+return `
   <div class="text-center">
     <div class="paper-h1 text-lg">${school}</div>
     <div class="text-[12.5px] mt-0.5">${exam}</div>
@@ -231,7 +276,7 @@ function renderHeader(){
   </div>
   <hr class="my-3 border-t border-black/20">`;
 }
-
+}
 
 function parseSections(){
   const out = [];
@@ -301,11 +346,32 @@ function downloadPDF(){
   };
   setTimeout(()=>{ html2pdf().set(opt).from(el).save(); }, 500);
 }
+function downloadLandscapePDF(){
+  const el = document.getElementById('paper');
+  el.classList.add('landscape');
+  generate();
+  const opt = {
+    margin:[0,0,0,0],
+    filename:'question-paper-landscape.pdf',
+    image:{ type:'jpeg', quality:1 },
+    html2canvas:{ scale:2, useCORS:true },
+    jsPDF:{ unit:'mm', format:'a4', orientation:'landscape' },
+    pagebreak:{ mode:['css','legacy'] }
+  };
+  setTimeout(()=>{ html2pdf().set(opt).from(el).save(); }, 500);
+}
+function generateLandscape(){
+  const paper = document.getElementById('paper');
+  paper.classList.add('landscape');
+  setTimeout(() => generate(), 100);
+}
 
 document.getElementById('addSec').onclick = ()=>{ addSection(); refreshIndices(); };
 document.getElementById('clearAll').onclick = ()=>{ secWrap.innerHTML=""; refreshIndices(); };
 document.getElementById('generate').onclick = generate;
+document.getElementById('generateLandscape').onclick = generateLandscape;
 document.getElementById('download').onclick = downloadPDF;
+document.getElementById('downloadLandscape').onclick = downloadLandscapePDF;
 document.getElementById('demo').onclick = ()=>{ secWrap.innerHTML=""; addSection({title:"Demo Section",qs:["Q1","Q2"]}); generate(); };
 
 window.addEventListener('DOMContentLoaded', ()=>{ addSection(); refreshIndices(); });

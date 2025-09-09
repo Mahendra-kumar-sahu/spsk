@@ -1,111 +1,260 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About | Samarth Public School Khati</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dynamic Exam Paper Generator</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+
+<style>
+  .sheet{ width:210mm; min-height:297mm; margin:auto; background:#fff; color:#111;
+          box-shadow:0 10px 30px rgba(0,0,0,.15); }
+  .sheet.landscape{ width:297mm; min-height:210mm; }
+  .sheet-inner{ padding:16mm 16mm 18mm 16mm; }
+  .paper-h1{ font-weight:700; letter-spacing:.2px; }
+  .dline{ border-bottom:1px dotted #000; height:1.1em; }
+  .q{ margin-top:12px; }
+  .q img{ max-width:110px; display:block; margin:8px 0 4px 0; }
+  .opt-s{ margin-top:4px; font-size:13px; }
+  .join-row{ display:flex; align-items:center; gap:10px; margin:8px 0; }
+  .join-oval{ padding:2px 12px; border:1px solid #000; border-radius:999px; font-size:13px; }
+  .join-line{ flex:1; border-top:1px solid #000; height:0; }
+  .match-wrap{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .match-col p{ margin:6px 0; }
+  .img-row{ display:flex; align-items:flex-end; gap:20px; margin:12px 0 6px; }
+  .img-row img{ width:95px; height:75px; object-fit:cover; }
+  .img-row .opts{ text-align:center; font-size:13px; margin-top:2px; }
+  @media print{
+    body{ background:#fff!important; margin:0; }
+    .no-print{ display:none!important; }
+    .sheet{ box-shadow:none; margin:0 auto; }
+  }
+  @page{ size:A4; margin:0; }
+  @page landscape{ size:A4 landscape; margin:0; }
+</style>
 </head>
-<body class="bg-gradient-to-br from-gray-900 via-indigo-950 to-gray-900 text-gray-100">
+<body class="bg-slate-900 text-slate-100 min-h-screen">
 
-  <!-- Hero Section -->
-  <section class="relative py-24 text-center">
-    <div class="container mx-auto px-6">
-      <!-- Logo -->
-      <img src="spsk1.png" alt="School Logo" class="w-24 h-24 mx-auto mb-6 rounded-full shadow-lg bg-white p-2">
-      
-      <h1 class="text-5xl md:text-6xl font-extrabold mb-4">
-        About <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">Samarth Public School</span>
-      </h1>
-      <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-300">
-        Empowering Students with Knowledge, Values & Innovation for a Brighter Tomorrow
-      </p>
-    </div>
-  </section>
+<header class="no-print sticky top-0 z-40 border-b border-white/10 bg-black/30 backdrop-blur">
+  <div class="max-w-7xl mx-auto h-14 px-6 flex items-center justify-between">
+    <div class="font-semibold">Dynamic Exam Paper Generator</div>
+    <div class="text-sm opacity-80">A4 Preview • Print / PDF</div>
+  </div>
+</header>
 
-  <!-- About Section -->
-  <section class="py-20 container mx-auto px-6 text-center">
-    <h2 class="text-3xl font-bold mb-6 text-white">Who We Are</h2>
-    <p class="text-lg text-gray-300 max-w-4xl mx-auto leading-relaxed">
-      Samarth Public School, Khati is dedicated to providing quality education that blends academic excellence with character building. 
-      Our mission is to create responsible citizens with strong values, innovative minds, and a global outlook.  
-      We believe education is not just about textbooks, but about preparing students for life.
-    </p>
-  </section>
+<main class="max-w-7xl mx-auto px-6 py-8 space-y-6">
 
-  <!-- Stats Section -->
-  <section class="py-16 bg-opacity-10 backdrop-blur-lg bg-white/5">
-    <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
-      <div class="p-6 rounded-2xl bg-white/10 backdrop-blur-md shadow-lg">
-        <h3 class="text-5xl font-extrabold text-blue-400">1000+</h3>
-        <p class="mt-2 text-lg text-gray-300">Students</p>
+  <!-- Header -->
+  <section class="no-print p-4 rounded-2xl bg-white/10 border border-white/10">
+    <h2 class="font-semibold mb-3">Header</h2>
+    <div class="grid grid-cols-1 gap-3">
+      <input id="h_school" class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="School Name" value="SAMARTH PUBLIC SCHOOL KHATI">
+      <input id="h_exam"   class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Exam Title" value="ANNUAL EXAMINATION 2024 - 25">
+      <div class="grid grid-cols-2 gap-3">
+        <input id="h_subject" class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Subject" value="English">
+        <input id="h_class"   class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Class" value="L.K.G.">
       </div>
-      <div class="p-6 rounded-2xl bg-white/10 backdrop-blur-md shadow-lg">
-        <h3 class="text-5xl font-extrabold text-purple-400">20+</h3>
-        <p class="mt-2 text-lg text-gray-300">Experienced Teachers</p>
-      </div>
-      <div class="p-6 rounded-2xl bg-white/10 backdrop-blur-md shadow-lg">
-        <h3 class="text-5xl font-extrabold text-pink-400">6+</h3>
-        <p class="mt-2 text-lg text-gray-300">Years of Excellence</p>
+      <div class="grid grid-cols-2 gap-3">
+        <input id="h_marks"   class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Marks" value="70">
+        <input id="h_duration"class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Time (e.g. 3 Hours)">
       </div>
     </div>
   </section>
 
-  <!-- Why Choose Us -->
-  <section class="py-20 container mx-auto px-6">
-    <h2 class="text-3xl font-bold text-center mb-12 text-white">Why Choose Us?</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="p-8 rounded-2xl bg-white/10 backdrop-blur-md shadow-lg hover:scale-105 transition">
-        <h3 class="text-xl font-bold text-blue-400 mb-3">Holistic Education</h3>
-        <p class="text-gray-300">We focus on overall development including academics, sports, and cultural activities.</p>
-      </div>
-      <div class="p-8 rounded-2xl bg-white/10 backdrop-blur-md shadow-lg hover:scale-105 transition">
-        <h3 class="text-xl font-bold text-purple-400 mb-3">Modern Infrastructure</h3>
-        <p class="text-gray-300">Smart classrooms, advanced labs, and digital learning tools for next-gen education.</p>
-      </div>
-      <div class="p-8 rounded-2xl bg-white/10 backdrop-blur-md shadow-lg hover:scale-105 transition">
-        <h3 class="text-xl font-bold text-pink-400 mb-3">Experienced Faculty</h3>
-        <p class="text-gray-300">Dedicated teachers nurturing creativity, curiosity, and confidence in every child.</p>
-      </div>
+  <!-- Question Form -->
+  <section class="no-print p-4 rounded-2xl bg-white/10 border border-white/10">
+    <h2 class="font-semibold mb-3">Add Question</h2>
+    <textarea id="q_text" class="w-full min-h-[80px] px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Question text / instruction"></textarea>
+
+    <div class="mt-4 space-y-3">
+
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" id="chk_lines"> Add writing lines
+      </label>
+      <input id="q_lines" type="number" min="1" value="5" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden">
+
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" id="chk_opts"> Add options
+      </label>
+      <input id="q_opts" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden" placeholder="cat, bat, mat">
+
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" id="chk_img"> Add image
+      </label>
+      <input id="q_img" type="file" accept="image/*" class="w-full text-sm hidden">
+      <input id="q_caption" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden" placeholder="Caption (optional)">
+
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" id="chk_match"> Add match pairs
+      </label>
+      <input id="q_match" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden" placeholder="left1,left2 | right1,right2">
+
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" id="chk_join"> Add join letters/words
+      </label>
+      <input id="q_join" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden" placeholder="A,B,C,D">
+
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" id="chk_imagerow"> Add image row with options
+      </label>
+      <input id="q_imgrow" type="file" accept="image/*" class="w-full text-sm hidden">
+      <input id="q_imgrow_opts" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden" placeholder="Option1, Option2, Option3">
+
+    </div>
+
+    <div class="mt-4 flex gap-2">
+      <button id="btn_add" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-400 to-indigo-400 text-black font-semibold">+ Add to Paper</button>
+      <button id="btn_clear" class="px-3 py-2 rounded border border-white/20">Clear Form</button>
     </div>
   </section>
 
-  <!-- Gallery -->
-  <section class="py-20 bg-gray-950/40">
-    <div class="container mx-auto px-6 text-center">
-      <h2 class="text-3xl font-bold mb-12 text-white">Our School in Pictures</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        <div class="overflow-hidden rounded-xl shadow-lg">
-          <img src="image6.jpeg" alt="School Campus" class="w-full h-60 object-cover hover:scale-110 transition">
-        </div>
-        <div class="overflow-hidden rounded-xl shadow-lg">
-          <img src="image2.jpeg" alt="Students" class="w-full h-60 object-cover hover:scale-110 transition">
-        </div>
-        <div class="overflow-hidden rounded-xl shadow-lg">
-          <img src="image1.jpg" alt="Our School" class="w-full h-60 object-cover hover:scale-110 transition">
-        </div>
-        <div class="overflow-hidden rounded-xl shadow-lg">
-          <img src="image3.jpeg" alt="Sports" class="w-full h-60 object-cover hover:scale-110 transition">
-        </div>
-        <div class="overflow-hidden rounded-xl shadow-lg">
-          <img src="image5.jpg" alt="School logo" class="w-full h-60 object-cover hover:scale-110 transition">
-        </div>
-        <div class="overflow-hidden rounded-xl shadow-lg">
-          <img src="image2.jpeg" alt="Celebration" class="w-full h-60 object-cover hover:scale-110 transition">
-        </div>
-      </div>
-    </div>
+  <!-- Actions -->
+  <section class="no-print p-4 rounded-2xl bg-white/10 border border-white/10 flex flex-wrap gap-2">
+    <button id="btn_portrait" class="px-3 py-2 rounded bg-emerald-500 text-black font-semibold">Portrait</button>
+    <button id="btn_landscape" class="px-3 py-2 rounded bg-yellow-400 text-black font-semibold">Landscape</button>
+    <button id="btn_preview" class="px-3 py-2 rounded bg-indigo-500 font-semibold">Preview</button>
+    <button id="btn_print" class="px-3 py-2 rounded bg-rose-500 font-semibold">Print</button>
+    <button id="btn_pdf" class="px-3 py-2 rounded border border-white/20">Download PDF</button>
   </section>
 
-  <!-- Footer -->
-  <footer class="bg-gradient-to-r from-indigo-800 to-purple-900 text-gray-200 py-10">
-    <div class="container mx-auto px-6 text-center">
-      <h3 class="text-xl font-semibold">Samarth Public School, Khati</h3>
-      <p class="mt-2">📍 Khati, India | 📞 +91-9876543210 | ✉️ info@samarthschool.com</p>
-      <p class="mt-4 text-sm text-gray-400">© 2025 Samarth Public School. All rights reserved.</p>
+  <!-- Preview -->
+  <section class="bg-white/5 p-4 rounded-2xl border border-white/10">
+    <h2 class="font-semibold text-lg mb-3">Preview</h2>
+    <div id="paper" class="sheet">
+      <div class="sheet-inner" id="paperInner"></div>
     </div>
-  </footer>
+  </section>
+</main>
 
+<script>
+const $ = s => document.querySelector(s);
+const state = { questions: [], orientation: 'portrait' };
+
+async function fileToDataURL(file){
+  if(!file) return '';
+  return new Promise(res=>{
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.readAsDataURL(file);
+  });
+}
+
+['chk_lines','chk_opts','chk_img','chk_match','chk_join','chk_imagerow'].forEach(id=>{
+  $('#'+id).addEventListener('change', e=>{
+    const map={
+      chk_lines:'q_lines',
+      chk_opts:'q_opts',
+      chk_img:'q_img,q_caption',
+      chk_match:'q_match',
+      chk_join:'q_join',
+      chk_imagerow:'q_imgrow,q_imgrow_opts'
+    };
+    (map[id]||"").split(',').forEach(fid=>{
+      if(!fid) return;
+      $('#'+fid).classList.toggle('hidden',!e.target.checked);
+    });
+  });
+});
+
+$('#btn_add').addEventListener('click', async () => {
+  const text = $('#q_text').value.trim();
+  let q = { type:"plain", text };
+
+  if($('#chk_lines').checked){ q.type="lines"; q.lines = parseInt($('#q_lines').value||'5',10); }
+  else if($('#chk_opts').checked){ q.type="options"; q.options = $('#q_opts').value.split(',').map(s=>s.trim()).filter(Boolean); }
+  else if($('#chk_img').checked){ q.type="image"; q.img = await fileToDataURL($('#q_img').files[0]); q.caption = $('#q_caption').value.trim(); }
+  else if($('#chk_match').checked){ q.type="match"; q.match = $('#q_match').value.trim(); }
+  else if($('#chk_join').checked){ q.type="join"; q.join = $('#q_join').value.trim(); }
+  else if($('#chk_imagerow').checked){ q.type="imagerow"; q.imgrow = await fileToDataURL($('#q_imgrow').files[0]); q.imgrowOpts = $('#q_imgrow_opts').value.split(',').map(s=>s.trim()).filter(Boolean); }
+
+  state.questions.push(q);
+  clearForm();
+  render();
+});
+
+$('#btn_clear').addEventListener('click', clearForm);
+function clearForm(){ 
+  ['q_text','q_opts','q_lines','q_caption','q_match','q_join','q_imgrow_opts'].forEach(id=>$('#'+id).value=""); 
+  ['q_img','q_imgrow'].forEach(id=>$('#'+id).value=""); 
+  ['chk_lines','chk_opts','chk_img','chk_match','chk_join','chk_imagerow'].forEach(id=>$('#'+id).checked=false);
+  document.querySelectorAll('input,textarea').forEach(el=>el.classList.add('hidden'));
+  $('#q_text').classList.remove('hidden');
+}
+
+function headerHTML(){
+  const sc= $('#h_school').value.trim() || "School Name";
+  const ex= $('#h_exam').value.trim();
+  const sub=$('#h_subject').value.trim();
+  const cls=$('#h_class').value.trim();
+  const mk =$('#h_marks').value.trim();
+  const du =$('#h_duration').value.trim();
+  return `
+    <div class="text-center">
+      <div class="paper-h1">${sc}</div>
+      <div class="text-[12.5px]">${ex}</div>
+      <div class="text-[12.5px] flex justify-between mt-1">
+        <div>Subject: <b>${sub}</b></div>
+        <div>Class: <b>${cls}</b></div>
+      </div>
+    </div>
+    <div class="flex items-center text-[12.5px] mt-2">
+      <div>Name</div><div class="flex-1 dline mx-2"></div>
+      <div class="ml-2">Roll No.</div><div class="flex-1 dline mx-2"></div>
+      <div class="ml-2">Marks: <b>${mk}</b></div>
+      ${du?`<div class="ml-4">Time: <b>${du}</b></div>`:""}
+    </div>
+    <hr class="my-3 border-t border-black/20">
+  `;
+}
+
+function r_plain(q,i){ return `<div class="q"><p><b>Q.${i}</b> ${q.text}</p></div>`; }
+function r_lines(q,i){ return `<div class="q"><p><b>Q.${i}</b> ${q.text}</p>${'<div class="dline mt-3"></div>'.repeat(q.lines||5)}</div>`; }
+function r_options(q,i){ return `<div class="q"><p><b>Q.${i}</b> ${q.text}</p><p class="opt-s">${q.options.join(" / ")}</p></div>`; }
+function r_image(q,i){ return `<div class="q"><p><b>Q.${i}</b> ${q.text}</p>${q.img?`<img src="${q.img}">`:""}${q.caption?`<div class="text-[12px]">${q.caption}</div>`:""}</div>`; }
+function r_match(q,i){
+  let [lft="",rgt=""] = q.match.split('|');
+  let left = (lft||"").split(',').map(s=>s.trim()).filter(Boolean);
+  let right = (rgt||"").split(',').map(s=>s.trim()).filter(Boolean);
+  return `<div class="q"><p><b>Q.${i}</b> Match the following:</p>
+    <div class="match-wrap">
+      <div class="match-col">${left.map(x=>`<p>${x}</p>`).join("")}</div>
+      <div class="match-col">${right.map(x=>`<p>${x}</p>`).join("")}</div>
+    </div></div>`;
+}
+function r_join(q,i){
+  let items = q.join.split(',').map(s=>s.trim()).filter(Boolean);
+  return `<div class="q"><p><b>Q.${i}</b> Join the following:</p>
+    ${items.map(x=>`<div class="join-row"><div class="join-oval">${x}</div><div class="join-line"></div></div>`).join("")}</div>`;
+}
+function r_imagerow(q,i){
+  let opts = (q.imgrowOpts||[]).map(o=>`<div class="opts">${o}</div>`).join("");
+  return `<div class="q"><p><b>Q.${i}</b> ${q.text}</p>
+    <div class="img-row">${q.imgrow?`<img src="${q.imgrow}">`:""}<div>${opts}</div></div></div>`;
+}
+
+function render(){
+  const paper = $('#paper');
+  paper.classList.toggle('landscape', state.orientation==='landscape');
+  const header = headerHTML();
+  let body="";
+  state.questions.forEach((q,idx)=>{
+    if(q.type==="plain") body += r_plain(q,idx+1);
+    if(q.type==="lines") body += r_lines(q,idx+1);
+    if(q.type==="options") body += r_options(q,idx+1);
+    if(q.type==="image") body += r_image(q,idx+1);
+    if(q.type==="match") body += r_match(q,idx+1);
+    if(q.type==="join") body += r_join(q,idx+1);
+    if(q.type==="imagerow") body += r_imagerow(q,idx+1);
+  });
+  $('#paperInner').innerHTML = header + body;
+}
+
+$('#btn_preview').addEventListener('click', render);
+$('#btn_portrait').addEventListener('click', ()=>{ state.orientation="portrait"; render(); });
+$('#btn_landscape').addEventListener('click', ()=>{ state.orientation="landscape"; render(); });
+$('#btn_print').addEventListener('click', ()=>{ render(); window.print(); });
+$('#btn_pdf').addEventListener('click', ()=>{ render(); html2pdf().from($('#paper')).save(); });
+</script>
 </body>
 </html>
-

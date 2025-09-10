@@ -8,9 +8,11 @@
 <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 
 <style>
-  /* --- Paper (A4) --- */
-  .sheet{ width:210mm; min-height:297mm; margin:auto; background:#fff; color:#111;
-          box-shadow:0 10px 30px rgba(0,0,0,.15); }
+  .q img {
+    display: inline-block; 
+    margin: 4px;
+  }
+  .sheet{ width:210mm; min-height:297mm; margin:auto; background:#fff; color:#111; box-shadow:0 10px 30px rgba(0,0,0,.15); }
   .sheet.landscape{ width:297mm; min-height:210mm; }
   .sheet-inner{ padding:16mm 16mm 18mm 16mm; }
   .paper-h1{ font-weight:700; letter-spacing:.2px; }
@@ -26,7 +28,6 @@
   .img-row{ display:flex; align-items:flex-end; gap:20px; margin:12px 0 6px; }
   .img-row img{ width:95px; height:75px; object-fit:cover; }
   .img-row .opts{ text-align:center; font-size:13px; margin-top:2px; }
-  /* --- Print --- */
   @media print{
     body{ background:#fff!important; margin:0; }
     .no-print{ display:none!important; }
@@ -38,7 +39,6 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen">
 
-<!-- TOP BAR -->
 <header class="no-print sticky top-0 z-40 border-b border-white/10 bg-black/30 backdrop-blur">
   <div class="max-w-7xl mx-auto h-14 px-6 flex items-center justify-between">
     <div class="font-semibold">Dynamic Exam Paper Generator</div>
@@ -48,60 +48,69 @@
 
 <main class="max-w-7xl mx-auto px-6 py-8 space-y-6">
 
-  <!-- CONTROLS -->
-  <section class="no-print grid lg:grid-cols-2 gap-6">
-    <!-- Header form -->
-    <div class="p-4 rounded-2xl bg-white/10 border border-white/10">
-      <h2 class="font-semibold mb-3">Header</h2>
-      <div class="grid grid-cols-1 gap-3">
-        <input id="h_school" class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="School Name" value="SAMARTH PUBLIC SCHOOL KHATI">
-        <input id="h_exam"   class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Exam Title" value="ANNUAL EXAMINATION 2024 - 25">
-        <div class="grid grid-cols-2 gap-3">
-          <input id="h_subject" class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Subject" value="English">
-          <input id="h_class"   class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Class" value="L.K.G.">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <input id="h_marks"   class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Marks" value="70">
-          <input id="h_duration"class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Time (e.g. 3 Hours)">
-        </div>
+  <!-- Header -->
+  <section class="no-print p-4 rounded-2xl bg-white/10 border border-white/10">
+    <h2 class="font-semibold mb-3">Header</h2>
+    <div class="grid grid-cols-1 gap-3">
+      <input id="h_school" class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="School Name" value="SAMARTH PUBLIC SCHOOL KHATI">
+      <input id="h_exam" class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Exam Title" value="ANNUAL EXAMINATION 2024 - 25">
+      <div class="grid grid-cols-2 gap-3">
+        <input id="h_subject" class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Subject" value="English">
+        <input id="h_class" class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Class" value="L.K.G.">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <input id="h_marks" class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Marks" value="70">
+        <input id="h_duration" class="px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Time (e.g. 3 Hours)">
       </div>
     </div>
+  </section>
 
-    <!-- Add question -->
-    <div class="p-4 rounded-2xl bg-white/10 border border-white/10">
-      <h2 class="font-semibold mb-3">Add Question</h2>
-      <label class="text-sm">Type</label>
-      <select id="q_type" class="w-full mt-1 px-3 py-2 rounded bg-black/40 border border-white/10">
-        <option value="plain">Plain / Instruction</option>
-        <option value="lines">Write on Lines</option>
-        <option value="options">Options (A / B / C)</option>
-        <option value="image">Image + Text</option>
-        <option value="match">Match the Words</option>
-        <option value="join">Join Letters</option>
-        <option value="imagerow">Image Row with Options</option>
-      </select>
-      <textarea id="q_text" class="mt-3 w-full min-h-[80px] px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Question text / instruction"></textarea>
+  <!-- Question Form -->
+  <section class="no-print p-4 rounded-2xl bg-white/10 border border-white/10">
+    <h2 class="font-semibold mb-3">Add Question</h2>
+    <textarea id="q_text" class="w-full min-h-[80px] px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Question text / instruction"></textarea>
 
-      <div id="wrap_options" class="mt-3 hidden">
-        <label class="text-sm">Options (comma separated)</label>
-        <input id="q_opts" class="mt-1 w-full px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="cat, bat, mat">
+    <div class="mt-4 space-y-3">
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="chk_lines"> Add writing lines</label>
+      <input id="q_lines" type="number" min="1" value="5" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden">
+
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="chk_opts"> Add options</label>
+      <input id="q_opts" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden" placeholder="cat, bat, mat">
+
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="chk_img"> Add image(s)</label>
+      <input id="q_img" type="file" accept="image/*" multiple class="w-full text-sm hidden">
+      <div id="q_img_captions" class="space-y-2 hidden"></div>
+
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="chk_match"> Add match pairs</label>
+      <input id="q_match" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden" placeholder="left1,left2 | right1,right2">
+
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="chk_join"> Add join letters/words</label>
+      <input id="q_join" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden" placeholder="A,B,C,D">
+
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="chk_imagerow"> Add image row with options</label>
+      <input id="q_imgrow" type="file" accept="image/*" class="w-full text-sm hidden">
+      <input id="q_imgrow_opts" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden" placeholder="Option1, Option2, Option3">
+
+      <!-- Match letters with images -->
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="chk_matchimg"> Add match letters with images</label>
+      <div id="q_matchimg_box" class="hidden space-y-2">
+        <input id="q_matchimg_text" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Instruction e.g., Match the given letter">
+        <input id="q_matchimg_letters" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Letters e.g., D,A,R,B,I">
+        <input id="q_matchimg_imgs" type="file" accept="image/*" multiple class="w-full text-sm">
       </div>
 
-      <div id="wrap_lines" class="mt-3 hidden">
-        <label class="text-sm">Number of lines</label>
-        <input id="q_lines" type="number" min="1" value="5" class="mt-1 w-full px-3 py-2 rounded bg-black/40 border border-white/10">
-      </div>
+      <!-- ✅ New: Use of a/an -->
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="chk_articles"> Add "a/an" words</label>
+      <input id="q_articles" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden" placeholder="apple, ball, elephant, dog, owl">
 
-      <div id="wrap_image" class="mt-3 hidden">
-        <label class="text-sm">Add Image</label>
-        <input id="q_img" type="file" accept="image/*" class="mt-1 w-full text-sm">
-        <input id="q_caption" class="mt-2 w-full px-3 py-2 rounded bg-black/40 border border-white/10" placeholder="Caption (optional)">
-      </div>
+      <!-- ✅ New: Next two letters -->
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="chk_nextletters"> Add next two letters</label>
+      <input id="q_nextletters" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden" placeholder="A, H, K, M">
+    </div>
 
-      <div class="mt-4 flex gap-2">
-        <button id="btn_add" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-400 to-indigo-400 text-black font-semibold">+ Add to Paper</button>
-        <button id="btn_clear" class="px-3 py-2 rounded border border-white/20">Clear Form</button>
-      </div>
+    <div class="mt-4 flex gap-2">
+      <button id="btn_add" class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-400 to-indigo-400 text-black font-semibold">+ Add to Paper</button>
+      <button id="btn_clear" class="px-3 py-2 rounded border border-white/20">Clear Form</button>
     </div>
   </section>
 
@@ -114,60 +123,93 @@
     <button id="btn_pdf" class="px-3 py-2 rounded border border-white/20">Download PDF</button>
   </section>
 
-  <!-- PREVIEW -->
+  <!-- Preview -->
   <section class="bg-white/5 p-4 rounded-2xl border border-white/10">
     <h2 class="font-semibold text-lg mb-3">Preview</h2>
     <div id="paper" class="sheet">
-      <div class="sheet-inner" id="paperInner"><!-- filled by JS --></div>
+      <div class="sheet-inner" id="paperInner"></div>
     </div>
   </section>
 </main>
 
 <script>
 const $ = s => document.querySelector(s);
-const state = { questions: [], orientation: 'portrait', schoolFixed: "" };
+const state = { questions: [], orientation: 'portrait' };
 
-async function fileToDataURL(file){
-  if(!file) return '';
-  return new Promise(res=>{
-    const r = new FileReader();
-    r.onload = e => res(e.target.result);
-    r.readAsDataURL(file);
+// File helpers
+async function fileToDataURL(file){ if(!file) return ''; return new Promise(res=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.readAsDataURL(file); }); }
+async function filesToDataURLs(fileList){ if(!fileList || fileList.length===0) return []; return Promise.all(Array.from(fileList).map(f=>new Promise(res=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.readAsDataURL(f); }))); }
+
+// Toggle inputs
+['chk_lines','chk_opts','chk_img','chk_match','chk_join','chk_imagerow','chk_matchimg','chk_articles','chk_nextletters'].forEach(id=>{
+  $('#'+id).addEventListener('change', e=>{
+    const map={
+      chk_lines:'q_lines',
+      chk_opts:'q_opts',
+      chk_img:'q_img,q_caption',
+      chk_match:'q_match',
+      chk_join:'q_join',
+      chk_imagerow:'q_imgrow,q_imgrow_opts',
+      chk_matchimg:'q_matchimg_box',
+      chk_articles:'q_articles',
+      chk_nextletters:'q_nextletters'
+    };
+    (map[id]||"").split(',').forEach(fid=>{ if(!fid) return; $('#'+fid).classList.toggle('hidden',!e.target.checked); });
   });
-}
+});
 
-function showWrapsFor(type){
-  ['wrap_options','wrap_lines','wrap_image'].forEach(id=>$('#'+id).classList.add('hidden'));
-  if($('#wrap_'+type)) $('#wrap_'+type).classList.remove('hidden');
-}
-$('#q_type').addEventListener('change', e => showWrapsFor(e.target.value));
-showWrapsFor($('#q_type').value);
+// Add question
+$('#btn_add').addEventListener('click', async ()=>{
+  const text=$('#q_text').value.trim();
+  let q={ type:"plain", text };
+  
+  if($('#chk_lines').checked){ q.type="lines"; q.lines=parseInt($('#q_lines').value||'5',10); }
+  else if($('#chk_opts').checked){ q.type="options"; q.options=$('#q_opts').value.split(',').map(s=>s.trim()).filter(Boolean); }
+  else if($('#chk_img').checked){ q.type="image"; q.imgs=await filesToDataURLs($('#q_img').files); q.captions=Array.from($('#q_img_captions').querySelectorAll('input')).map(i=>i.value.trim()); }
+  else if($('#chk_match').checked){ q.type="match"; q.match=$('#q_match').value.trim(); }
+  else if($('#chk_join').checked){ q.type="join"; q.join=$('#q_join').value.trim(); }
+  else if($('#chk_imagerow').checked){ q.type="imagerow"; q.imgrow=await fileToDataURL($('#q_imgrow').files[0]); q.imgrowOpts=$('#q_imgrow_opts').value.split(',').map(s=>s.trim()).filter(Boolean); }
+  else if($('#chk_matchimg').checked){ 
+    q.type="matchimg"; 
+    q.text=$('#q_matchimg_text').value.trim(); 
+    q.letters=$('#q_matchimg_letters').value.split(',').map(s=>s.trim()).filter(Boolean); 
+    q.imgs=await filesToDataURLs($('#q_matchimg_imgs').files);
+  }
+  else if($('#chk_articles').checked){ 
+    q.type="articles"; 
+    q.words=$('#q_articles').value.split(',').map(s=>s.trim()).filter(Boolean); 
+  }
+  else if($('#chk_nextletters').checked){ 
+    q.type="nextletters"; 
+    q.letters=$('#q_nextletters').value.split(',').map(s=>s.trim()).filter(Boolean); 
+  }
 
-$('#btn_add').addEventListener('click', async () => {
-  const type = $('#q_type').value;
-  const text = $('#q_text').value.trim();
-  let q = { type, text };
-  if(type==='options') q.options = $('#q_opts').value.split(',').map(s=>s.trim()).filter(Boolean);
-  if(type==='lines') q.lines = parseInt($('#q_lines').value||'5',10);
-  if(type==='image'){ q.img = await fileToDataURL($('#q_img').files[0]); q.caption = $('#q_caption').value.trim(); }
   state.questions.push(q);
   clearForm();
   render();
 });
 
+// Clear form
 $('#btn_clear').addEventListener('click', clearForm);
-function clearForm(){ ['q_text','q_opts','q_lines','q_img','q_caption'].forEach(id=>$('#'+id).value=""); $('#q_lines').value="5"; }
+function clearForm(){
+  ['q_text','q_opts','q_lines','q_caption','q_match','q_join','q_imgrow_opts','q_matchimg_text','q_matchimg_letters','q_articles','q_nextletters'].forEach(id=>$('#'+id).value="");
+  ['q_img','q_imgrow','q_matchimg_imgs'].forEach(id=>$('#'+id).value="");
+  ['chk_lines','chk_opts','chk_img','chk_match','chk_join','chk_imagerow','chk_matchimg','chk_articles','chk_nextletters'].forEach(id=>$('#'+id).checked=false);
+  document.querySelectorAll('input,textarea').forEach(el=>el.classList.add('hidden'));
+  $('#q_text').classList.remove('hidden');
+}
 
+// Header
 function headerHTML(){
-  if(!state.schoolFixed) state.schoolFixed = $('#h_school').value.trim() || "School Name";
+  const sc= $('#h_school').value.trim()||"School Name";
   const ex= $('#h_exam').value.trim();
   const sub=$('#h_subject').value.trim();
   const cls=$('#h_class').value.trim();
-  const mk =$('#h_marks').value.trim();
-  const du =$('#h_duration').value.trim();
+  const mk=$('#h_marks').value.trim();
+  const du=$('#h_duration').value.trim();
   return `
     <div class="text-center">
-      <div class="paper-h1">${state.schoolFixed}</div>
+      <div class="paper-h1">${sc}</div>
       <div class="text-[12.5px]">${ex}</div>
       <div class="text-[12.5px] flex justify-between mt-1">
         <div>Subject: <b>${sub}</b></div>
@@ -184,25 +226,95 @@ function headerHTML(){
   `;
 }
 
-function r_plain(q,i){ return `<div class="q"><p><b>Q.${i}</b> ${q.text}</p></div>`; }
-function r_lines(q,i){ return `<div class="q"><p><b>Q.${i}</b> ${q.text}</p>${'<div class="dline mt-3"></div>'.repeat(q.lines||5)}</div>`; }
-function r_options(q,i){ return `<div class="q"><p><b>Q.${i}</b> ${q.text}</p><p class="opt-s">${q.options.join(" / ")}</p></div>`; }
-function r_image(q,i){ return `<div class="q"><p><b>Q.${i}</b> ${q.text}</p>${q.img?`<img src="${q.img}">`:""}${q.caption?`<div class="text-[12px]">${q.caption}</div>`:""}</div>`; }
-
-function render(){
-  const paper = $('#paper');
-  paper.classList.toggle('landscape', state.orientation==='landscape');
-  const header = headerHTML();
-  let body="";
-  state.questions.forEach((q,idx)=>{ if(q.type==="plain") body+=r_plain(q,idx+1); if(q.type==="lines") body+=r_lines(q,idx+1); if(q.type==="options") body+=r_options(q,idx+1); if(q.type==="image") body+=r_image(q,idx+1); });
-  $('#paperInner').innerHTML = header + body;
+// Renderers
+function r_plain(q){ return `<div class="q"><p>${q.text}</p></div>`; }
+function r_lines(q){ return `<div class="q"><p>${q.text}</p>${'<div class="dline mt-3"></div>'.repeat(q.lines||5)}</div>`; }
+function r_options(q){ return `<div class="q"><p>${q.text}</p><p class="opt-s">${q.options.join(" / ")}</p></div>`; }
+function r_image(q){ let imgs=(q.imgs||[]).map((src,i)=>`<div class="flex flex-col items-center"><img src="${src}" class="w-[120px] h-[90px] object-contain border rounded">${q.captions && q.captions[i]?`<div class="text-[12px] mt-1">${q.captions[i]}</div>`:""}</div>`).join(""); return `<div class="q"><p>${q.text}</p><div class="flex flex-wrap gap-6 mt-2">${imgs}</div></div>`; }
+function r_match(q){ let [lft="",rgt=""]=q.match.split('|'); let left=(lft||"").split(',').map(s=>s.trim()).filter(Boolean); let right=(rgt||"").split(',').map(s=>s.trim()).filter(Boolean); return `<div class="q"><p>Match the following:</p><div class="match-wrap"><div class="match-col">${left.map(x=>`<p>${x}</p>`).join("")}</div><div class="match-col">${right.map(x=>`<p>${x}</p>`).join("")}</div></div></div>`; }
+function r_join(q){ let items=q.join.split(',').map(s=>s.trim()).filter(Boolean); return `<div class="q"><p>Join the following:</p>${items.map(x=>`<div class="join-row"><div class="join-oval">${x}</div><div class="join-line"></div></div>`).join("")}</div>`; }
+function r_imagerow(q){ let opts=(q.imgrowOpts||[]).map(o=>`<div class="opts">${o}</div>`).join(""); return `<div class="q"><p>${q.text}</p><div class="img-row">${q.imgrow?`<img src="${q.imgrow}">`:""}<div>${opts}</div></div></div>`; }
+function r_matchimg(q){ 
+  let pairs = (q.letters || []).map((l, i) => {
+    let img = (q.imgs && q.imgs[i]) 
+      ? `<img src="${q.imgs[i]}" class="w-[100px] h-[80px] object-contain border rounded">` 
+      : "";
+    return `
+      <div class="flex items-center gap-36 mb-18">
+        <div class="font-semibold text-lg">${l}</div>
+        <div>${img}</div>
+      </div>
+    `;
+  }).join("");
+  return `<div class="q"><p><b>${q.text || "Match the given letter:"}</b></p><div class="mt-20 space-y-20">${pairs}</div></div>`;
 }
 
+// ✅ New renderer: Use of a/an
+function r_articles(q){
+  let items = (q.words||[]).map(w=>`
+    <div class="flex items-center gap-2">
+      <div class="border-b border-black w-[40px]"></div>
+      <span>${w}</span>
+    </div>
+  `).join("");
+
+  return `
+    <div class="q">
+      <p>${q.text || "Use of a/an:"}</p>
+      <div class="flex flex-wrap gap-6 mt-3">
+        ${items}
+      </div>
+    </div>
+  `;
+}
+
+
+// ✅ New renderer: Next two letters
+function r_nextletters(q){
+  let items = (q.letters||[]).map(l=>`
+    <div class="flex items-center gap-3 mb-2">
+      <span>${l}</span>
+      <div class="border-b border-black min-w-[40px]"></div>
+      <div class="border-b border-black min-w-[40px]"></div>
+    </div>
+  `).join("");
+  return `<div class="q"><p>${q.text || "Write the next two letters:"}</p><div class="mt-2">${items}</div></div>`;
+}
+
+// Render function
+function render(){
+  const paper=$('#paper'); paper.classList.toggle('landscape',state.orientation==='landscape');
+  const header=headerHTML();
+  let body="";
+  state.questions.forEach(q=>{
+    if(q.type==="plain") body+=r_plain(q);
+    if(q.type==="lines") body+=r_lines(q);
+    if(q.type==="options") body+=r_options(q);
+    if(q.type==="image") body+=r_image(q);
+    if(q.type==="match") body+=r_match(q);
+    if(q.type==="join") body+=r_join(q);
+    if(q.type==="imagerow") body+=r_imagerow(q);
+    if(q.type==="matchimg") body+=r_matchimg(q);
+    if(q.type==="articles") body+=r_articles(q);
+    if(q.type==="nextletters") body+=r_nextletters(q);
+  });
+  $('#paperInner').innerHTML=header+body;
+}
+
+// Actions
 $('#btn_preview').addEventListener('click', render);
 $('#btn_portrait').addEventListener('click', ()=>{ state.orientation="portrait"; render(); });
 $('#btn_landscape').addEventListener('click', ()=>{ state.orientation="landscape"; render(); });
 $('#btn_print').addEventListener('click', ()=>{ render(); window.print(); });
 $('#btn_pdf').addEventListener('click', ()=>{ render(); html2pdf().from($('#paper')).save(); });
+
+// Image captions
+$('#q_img').addEventListener('change', e=>{
+  const files=e.target.files;
+  const capDiv=$('#q_img_captions'); capDiv.innerHTML="";
+  if(files && files.length>0){ capDiv.classList.remove('hidden'); Array.from(files).forEach((f,i)=>{ const inp=document.createElement('input'); inp.className="w-full px-3 py-2 rounded bg-black/40 border border-white/10"; inp.placeholder=`Caption for image ${i+1}`; capDiv.appendChild(inp); }); }
+  else capDiv.classList.add('hidden');
+});
 </script>
 </body>
 </html>

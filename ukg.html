@@ -106,6 +106,14 @@
       <!-- ✅ New: Next two letters -->
       <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="chk_nextletters"> Add next two letters</label>
       <input id="q_nextletters" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden" placeholder="A, H, K, M">
+
+      <!-- ✅ Step 1: New See & Write -->
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="chk_seewrite"> Add "See & Write"</label>
+      <input id="q_seewrite" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden" placeholder="am, an, as, at, go | be, he, me, we, no | if, in, is, it">
+
+      <!-- ✅ Step 1: New Join Letters Words -->
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="chk_joinwords"> Add "Join Letters"</label>
+      <input id="q_joinwords" class="w-full px-3 py-2 rounded bg-black/40 border border-white/10 hidden" placeholder="M,P | an ; B,C | at ; C,N | ap">
     </div>
 
     <div class="mt-4 flex gap-2">
@@ -141,7 +149,7 @@ async function fileToDataURL(file){ if(!file) return ''; return new Promise(res=
 async function filesToDataURLs(fileList){ if(!fileList || fileList.length===0) return []; return Promise.all(Array.from(fileList).map(f=>new Promise(res=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.readAsDataURL(f); }))); }
 
 // Toggle inputs
-['chk_lines','chk_opts','chk_img','chk_match','chk_join','chk_imagerow','chk_matchimg','chk_articles','chk_nextletters'].forEach(id=>{
+['chk_lines','chk_opts','chk_img','chk_match','chk_join','chk_imagerow','chk_matchimg','chk_articles','chk_nextletters','chk_seewrite','chk_joinwords'].forEach(id=>{
   $('#'+id).addEventListener('change', e=>{
     const map={
       chk_lines:'q_lines',
@@ -152,7 +160,9 @@ async function filesToDataURLs(fileList){ if(!fileList || fileList.length===0) r
       chk_imagerow:'q_imgrow,q_imgrow_opts',
       chk_matchimg:'q_matchimg_box',
       chk_articles:'q_articles',
-      chk_nextletters:'q_nextletters'
+      chk_nextletters:'q_nextletters',
+      chk_seewrite:'q_seewrite',
+      chk_joinwords:'q_joinwords'
     };
     (map[id]||"").split(',').forEach(fid=>{ if(!fid) return; $('#'+fid).classList.toggle('hidden',!e.target.checked); });
   });
@@ -175,13 +185,15 @@ $('#btn_add').addEventListener('click', async ()=>{
     q.letters=$('#q_matchimg_letters').value.split(',').map(s=>s.trim()).filter(Boolean); 
     q.imgs=await filesToDataURLs($('#q_matchimg_imgs').files);
   }
-  else if($('#chk_articles').checked){ 
-    q.type="articles"; 
-    q.words=$('#q_articles').value.split(',').map(s=>s.trim()).filter(Boolean); 
-  }
-  else if($('#chk_nextletters').checked){ 
-    q.type="nextletters"; 
-    q.letters=$('#q_nextletters').value.split(',').map(s=>s.trim()).filter(Boolean); 
+  else if($('#chk_articles').checked){ q.type="articles"; q.words=$('#q_articles').value.split(',').map(s=>s.trim()).filter(Boolean); }
+  else if($('#chk_nextletters').checked){ q.type="nextletters"; q.letters=$('#q_nextletters').value.split(',').map(s=>s.trim()).filter(Boolean); }
+  else if($('#chk_seewrite').checked){ q.type="seewrite"; q.groups=$('#q_seewrite').value.split('|').map(g=>g.split(',').map(s=>s.trim())); }
+  else if($('#chk_joinwords').checked){ 
+    q.type="joinwords"; 
+    q.pairs=$('#q_joinwords').value.split(';').map(p=>{
+      let [left,oval]=p.split('|'); 
+      return {left:(left||"").split(',').map(s=>s.trim()), oval:(oval||"").trim()};
+    });
   }
 
   state.questions.push(q);
@@ -192,9 +204,9 @@ $('#btn_add').addEventListener('click', async ()=>{
 // Clear form
 $('#btn_clear').addEventListener('click', clearForm);
 function clearForm(){
-  ['q_text','q_opts','q_lines','q_caption','q_match','q_join','q_imgrow_opts','q_matchimg_text','q_matchimg_letters','q_articles','q_nextletters'].forEach(id=>$('#'+id).value="");
+  ['q_text','q_opts','q_lines','q_caption','q_match','q_join','q_imgrow_opts','q_matchimg_text','q_matchimg_letters','q_articles','q_nextletters','q_seewrite','q_joinwords'].forEach(id=>$('#'+id).value="");
   ['q_img','q_imgrow','q_matchimg_imgs'].forEach(id=>$('#'+id).value="");
-  ['chk_lines','chk_opts','chk_img','chk_match','chk_join','chk_imagerow','chk_matchimg','chk_articles','chk_nextletters'].forEach(id=>$('#'+id).checked=false);
+  ['chk_lines','chk_opts','chk_img','chk_match','chk_join','chk_imagerow','chk_matchimg','chk_articles','chk_nextletters','chk_seewrite','chk_joinwords'].forEach(id=>$('#'+id).checked=false);
   document.querySelectorAll('input,textarea').forEach(el=>el.classList.add('hidden'));
   $('#q_text').classList.remove('hidden');
 }
@@ -229,7 +241,25 @@ function headerHTML(){
 // Renderers
 function r_plain(q){ return `<div class="q"><p>${q.text}</p></div>`; }
 function r_lines(q){ return `<div class="q"><p>${q.text}</p>${'<div class="dline mt-3"></div>'.repeat(q.lines||5)}</div>`; }
-function r_options(q){ return `<div class="q"><p>${q.text}</p><p class="opt-s">${q.options.join(" / ")}</p></div>`; }
+function r_options(q){
+  // Question heading
+  let question = `<p><b></b> ${q.text}</p>`;
+  
+  // Options row (side by side with spacing)
+  let options = `
+    <div class="flex flex-wrap gap-6 mt-2">
+      ${q.options.map(o=>`
+        <label class="flex items-center gap-2">
+          <input type="radio" name="opt_${q.text.replace(/\s+/g,'_')}" class="mt-0.5">
+          <span>${o}</span>
+        </label>
+      `).join("")}
+    </div>
+  `;
+  
+  return `<div class="q">${question}${options}</div>`;
+}
+
 function r_image(q){ let imgs=(q.imgs||[]).map((src,i)=>`<div class="flex flex-col items-center"><img src="${src}" class="w-[120px] h-[90px] object-contain border rounded">${q.captions && q.captions[i]?`<div class="text-[12px] mt-1">${q.captions[i]}</div>`:""}</div>`).join(""); return `<div class="q"><p>${q.text}</p><div class="flex flex-wrap gap-6 mt-2">${imgs}</div></div>`; }
 function r_match(q){ let [lft="",rgt=""]=q.match.split('|'); let left=(lft||"").split(',').map(s=>s.trim()).filter(Boolean); let right=(rgt||"").split(',').map(s=>s.trim()).filter(Boolean); return `<div class="q"><p>Match the following:</p><div class="match-wrap"><div class="match-col">${left.map(x=>`<p>${x}</p>`).join("")}</div><div class="match-col">${right.map(x=>`<p>${x}</p>`).join("")}</div></div></div>`; }
 function r_join(q){ let items=q.join.split(',').map(s=>s.trim()).filter(Boolean); return `<div class="q"><p>Join the following:</p>${items.map(x=>`<div class="join-row"><div class="join-oval">${x}</div><div class="join-line"></div></div>`).join("")}</div>`; }
@@ -248,8 +278,6 @@ function r_matchimg(q){
   }).join("");
   return `<div class="q"><p><b>${q.text || "Match the given letter:"}</b></p><div class="mt-20 space-y-20">${pairs}</div></div>`;
 }
-
-// ✅ New renderer: Use of a/an
 function r_articles(q){
   let items = (q.words||[]).map(w=>`
     <div class="flex items-center gap-2">
@@ -257,19 +285,8 @@ function r_articles(q){
       <span>${w}</span>
     </div>
   `).join("");
-
-  return `
-    <div class="q">
-      <p>${q.text || "Use of a/an:"}</p>
-      <div class="flex flex-wrap gap-6 mt-3">
-        ${items}
-      </div>
-    </div>
-  `;
+  return `<div class="q"><p>${q.text || "Use of a/an:"}</p><div class="flex flex-wrap gap-6 mt-3">${items}</div></div>`;
 }
-
-
-// ✅ New renderer: Next two letters
 function r_nextletters(q){
   let items = (q.letters||[]).map(l=>`
     <div class="flex items-center gap-3 mb-2">
@@ -279,6 +296,37 @@ function r_nextletters(q){
     </div>
   `).join("");
   return `<div class="q"><p>${q.text || "Write the next two letters:"}</p><div class="mt-2">${items}</div></div>`;
+}
+// ✅ New Renderer: See & Write
+
+// ✅ Updated Renderer: See & Write (single short line under each group)
+function r_seewrite(q){
+  let groups = (q.groups||[]).map(words=>`
+    <div class="mb-6">
+      <div class="flex gap-6 flex-wrap">
+        ${words.map(w=>`
+          <div class="flex flex-col items-center">
+            <span class="font-medium">${w}</span>
+            <div class="dline w-[60px] mt-1"></div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `).join("");
+  return `<div class="q"><p>${q.text || "See and write words:"}</p>${groups}</div>`;
+}
+// ✅ New Renderer: Join Letters (make words)
+function r_joinwords(q){
+  let rows = (q.pairs||[]).map(p=>{
+    return p.left.map(l=>`
+      <div class="join-row">
+        <div class="font-bold">${l}</div>
+        <div class="join-oval">${p.oval}</div>
+        <div class="join-line"></div>
+      </div>
+    `).join("");
+  }).join("");
+  return `<div class="q"><p>${q.text || "Join the letters and make new words:"}</p>${rows}</div>`;
 }
 
 // Render function
@@ -297,6 +345,8 @@ function render(){
     if(q.type==="matchimg") body+=r_matchimg(q);
     if(q.type==="articles") body+=r_articles(q);
     if(q.type==="nextletters") body+=r_nextletters(q);
+    if(q.type==="seewrite") body+=r_seewrite(q);
+    if(q.type==="joinwords") body+=r_joinwords(q);
   });
   $('#paperInner').innerHTML=header+body;
 }

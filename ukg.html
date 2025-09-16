@@ -12,6 +12,10 @@
     display: inline-block; 
     margin: 4px;
   }
+  .q p {
+  white-space: pre-wrap; /* preserves spaces and line breaks */
+}
+
   .sheet{ width:210mm; min-height:297mm; margin:auto; background:#fff; color:#111; box-shadow:0 10px 30px rgba(0,0,0,.15); }
   .sheet.landscape{ width:297mm; min-height:210mm; }
   .sheet-inner{ padding:16mm 16mm 18mm 16mm; }
@@ -240,7 +244,10 @@ function headerHTML(){
 
 // Renderers
 function r_plain(q){ return `<div class="q"><p>${q.text}</p></div>`; }
-function r_lines(q){ return `<div class="q"><p>${q.text}</p>${'<div class="dline mt-3"></div>'.repeat(q.lines||5)}</div>`; }
+function r_lines(q){ 
+  return `<div class="q"><div>${q.text}</div>${'<div class="dline mt-3"></div>'.repeat(q.lines||5)}</div>`; 
+}
+
 function r_options(q){
   // Question heading
   let question = `<p><b></b> ${q.text}</p>`;

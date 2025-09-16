@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Question Paper Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+  <style>
+    * { box-sizing: border-box; font-family: "Segoe UI", Arial, sans-serif; }
+    body { margin: 0; background: linear-gradient(160deg, #0f172a, #1e293b, #111827); color: #fff; }
+
+    /* ===== Topbar ===== */
+    .topbar {
+      background: #0f172a; color: #fff;
+      padding: 16px 24px; display: flex;
+      justify-content: space-between; align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo { width: 42px; height: 42px; border-radius: 6px; object-fit: cover; }
+    .school { font-weight: 700; font-size: 18px; }
+    .subtitle { font-size: 13px; opacity: 0.85; }
+    .right { font-size: 14px; font-weight: 500; }
+
+    /* ===== Container ===== */
+    .container { max-width: 1100px; margin: 28px auto; padding: 0 16px; }
+    .form-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px; background: rgba(255,255,255,0.05); padding: 28px;
+      border-radius: 16px; box-shadow: 0 8px 22px rgba(0,0,0,0.5);
+      backdrop-filter: blur(6px);
+    }
+
+    /* ===== Fields ===== */
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 14px; font-weight: 600; color: #d1d5db; }
+    .field input, .field textarea {
+      padding: 12px 14px; border: none;
+      border-radius: 10px; font-size: 14px;
+      background: rgba(255,255,255,0.08); color: #fff;
+      outline: none; transition: 0.2s;
+    }
+    .field input:focus, .field textarea:focus {
+      background: rgba(255,255,255,0.15);
+      box-shadow: 0 0 0 2px #3b82f6;
+    }
+    .field textarea { resize: vertical; min-height: 100px; }
+
+    /* ===== Section Header ===== */
+    .sections-header { grid-column: 1/-1; display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
+    .sections-header h3 { margin:0; font-size: 18px; color:#fff; font-weight:700; }
+    .sections { grid-column: 1/-1; display:flex; flex-direction:column; gap:18px; }
+
+    /* ===== Section Card ===== */
+    .section-card {
+      background: rgba(255,255,255,0.06);
+      padding:18px; border-radius:14px;
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    .section-top { display:flex; justify-content:space-between; margin-bottom:12px; }
+    .section-title { font-weight:600; font-size:15px; }
+    .section-actions { display:flex; gap:8px; }
+
+    /* ===== Buttons ===== */
+    .btn {
+      border:none; cursor:pointer; padding:10px 16px; border-radius:8px;
+      font-size:14px; font-weight:600; transition:all 0.2s; 
+    }
+    .btn.primary{background:#3b82f6;color:#fff;}
+    .btn.ghost{background:transparent;border:1px solid #64748b;color:#d1d5db;}
+    .btn.small{padding:6px 12px;font-size:12px;}
+    .btn.danger{background:#ef4444;color:#fff;}
+    .btn.blue{background:#2563eb;color:#fff;}
+    .btn.purple{background:#9333ea;color:#fff;}
+    .btn.orange{background:#f97316;color:#fff;}
+    .btn:hover{opacity:0.9; transform:translateY(-1px);}
+    .bottom-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:12px;margin-top:16px;}
+
+    /* ===== Paper Preview ===== */
+    #previewArea { margin-top: 24px; }
+    #previewArea .paper-root {
+      width: 297mm; height: 210mm;
+      margin: auto; background: #fff; color:#000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-radius: 8px; overflow: hidden;
+    }
+    .sheet-inner {
+      padding: 10mm 15mm 15mm 15mm !important;
+      column-count: 2; column-gap: 5mm; column-fill: auto;
+      column-rule: 1px solid #000; height: 100%;
+    }
+    @page { size: A4 landscape; margin: 12mm; }
+    @media print {
+      body { background: #fff !important; }
+      .paper-root { box-shadow: none !important; margin: 0 auto !important; }
+      .no-print { display: none !important; }
+    }
+    .unit { break-inside: avoid; page-break-inside: avoid; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img class="logo" src="spsk.jpg" alt="logo"/>
+        <div>
+          <div class="school">Samarth Public School</div>
+          <div class="subtitle">Question Paper Builder</div>
+        </div>
+      </div>
+      <div class="right">Paper Settings</div>
+    </header>
+
+    <main class="container">
+      <form id="paperForm" class="form-grid" autocomplete="off">
+        
+        <div class="field"><label>School Code</label><input type="text" id="schoolCode" value="2019004"/></div>
+        <div class="field"><label>School Name</label><input type="text" id="schoolName" value="SAMARTH PUBLIC SCHOOL KHATI"/></div>
+        <div class="field"><label>Exam Title</label><input type="text" id="examTitle" value="ANNUAL SUPPLY EXAMINATION 2024 - 25"/></div>
+        <div class="field"><label>Subject</label><input type="text" id="subject" value="Science"/></div>
+        <div class="field"><label>Class</label><input type="text" id="className" value="6th"/></div>
+        <div class="field"><label>Max Marks</label><input type="number" id="maxMarks" value="70"/></div>
+        <div class="field"><label>Duration</label><input type="text" id="duration" value="3 Hours"/></div>
+
+        <div class="sections-header">
+          <h3>Sections</h3>
+          <div class="controls">
+            <button type="button" id="addSection" class="btn primary">+ Add Section</button>
+            <button type="button" id="clearAll" class="btn ghost">Clear</button>
+          </div>
+        </div>
+        <div id="sections" class="sections"></div>
+
+        <div class="bottom-actions">
+          <button type="button" id="landscapePreview" class="btn purple">Landscape Preview</button>
+          <button type="button" id="landscapePdf" class="btn orange">Landscape PDF</button>
+          <button type="button" id="printPreview" class="btn blue">Print Preview</button>
+          <button type="button" id="fillDemo" class="btn ghost">Fill Demo Data</button>
+        </div>
+      </form>
+      <div id="previewArea"></div>
+    </main>
+  </div>
+
+  <!-- Template same as before -->
+  <template id="sectionTemplate">
+    <section class="section-card">
+      <div class="section-top">
+        <div class="section-title">Section <span class="section-index">#1</span></div>
+        <div class="section-actions">
+          <button type="button" class="btn small duplicate">Duplicate</button>
+          <button type="button" class="btn small danger remove">Remove</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Heading</label><input type="text" class="heading"/></div>
+        <div class="field"><label>Instruction</label><input type="text" class="instruction"/></div>
+      </div>
+      <div class="field"><label>Questions (one per line)</label><textarea class="questions" rows="6"></textarea></div>
+    </section>
+  </template>
+
+  <script>
+    // === JS बिल्कुल आपके पहले वाले जैसा रखा है ===
+    (function(){
+      const sectionsEl=document.getElementById("sections");
+      const template=document.getElementById("sectionTemplate").content;
+      const addBtn=document.getElementById("addSection");
+      const clearBtn=document.getElementById("clearAll");
+      const fillDemoBtn=document.getElementById("fillDemo");
+      const landscapePreviewBtn=document.getElementById("landscapePreview");
+      const landscapePdfBtn=document.getElementById("landscapePdf");
+      const previewArea=document.getElementById("previewArea");
+      const printPreviewBtn = document.getElementById("printPreview");
+
+      function createSection(data={}){ 
+        const node=template.cloneNode(true);
+        const section=node.querySelector(".section-card");
+        section.querySelector(".heading").value=data.heading||"";
+        section.querySelector(".instruction").value=data.instruction||"";
+        section.querySelector(".questions").value=data.questions||"";
+        section.querySelector(".duplicate").addEventListener("click",()=>{ 
+          const cloned={heading:section.querySelector(".heading").value,instruction:section.querySelector(".instruction").value,questions:section.querySelector(".questions").value};
+          addSection(cloned,section.nextSibling);
+        });
+        section.querySelector(".remove").addEventListener("click",()=>{section.remove();refreshIndexes();});
+        return section;
+      }
+      function addSection(data={},insertBefore=null){
+        const section=createSection(data);
+        if(insertBefore) sectionsEl.insertBefore(section,insertBefore); else sectionsEl.appendChild(section);
+        refreshIndexes();
+      }
+      function refreshIndexes(){sectionsEl.querySelectorAll(".section-card").forEach((el,i)=>{const idx=el.querySelector(".section-index");if(idx) idx.textContent=`#${i+1}`;});}
+      function clearAll(){sectionsEl.innerHTML="";addSection();}
+      function fillDemo(){
+        document.getElementById("schoolCode").value="2019004";
+        document.getElementById("schoolName").value="SAMARTH PUBLIC SCHOOL KHATI";
+        document.getElementById("examTitle").value="ANNUAL SUPPLY EXAMINATION 2024 - 25";
+        document.getElementById("subject").value="Mathematics";document.getElementById("className").value="6th";
+        document.getElementById("maxMarks").value=100;document.getElementById("duration").value="3 Hours";
+        sectionsEl.innerHTML="";
+        addSection({heading:"Unit I: Arithmetic",instruction:"Attempt all questions.",questions:"1. Divide 48 apples equally among 12 students.\n2. Add 35 + 47.\n3. Distance covered in 5 hours at 60 km/h?\n4. Multiply 237 by 15.\n5. Out of 250 mangoes, 25 spoiled. Find good ones."});
+      }
+      function printPreviewContent(){
+        const content = buildLandscapeHtml();
+        const printWindow = window.open("", "", "width=1200,height=800");
+        printWindow.document.write(`<html><head><title>Print Question Paper</title><style>${getPaperStyles()}</style></head><body>${content}</body></html>`);
+        printWindow.document.close();printWindow.focus();printWindow.print();
+      }
+      function escapeHtml(s=""){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
+      function buildLandscapeHtml(){
+        const code=(document.getElementById("schoolCode")||{}).value||"";
+        const school=(document.getElementById("schoolName")||{}).value||"";
+        const title=(document.getElementById("examTitle")||{}).value||"";
+        const subject=(document.getElementById("subject")||{}).value||"";
+        const cls=(document.getElementById("className")||{}).value||"";
+        const marks=(document.getElementById("maxMarks")||{}).value||"";
+        const duration=(document.getElementById("duration")||{}).value||"";
+        const sections=Array.from(document.querySelectorAll("#sections .section-card")).map(sc=>{ 
+          const h=(sc.querySelector(".heading")||{}).value||"";
+          const ins=(sc.querySelector(".instruction")||{}).value||"";
+          const qs=((sc.querySelector(".questions")||{}).value||"").split("\n").map(q=>q.trim()).filter(Boolean);
+          return {h,ins,qs};
+        });
+        let html=`<div class="paper-root landscape"><div class="sheet-inner" id="paperInner">`;
+        html+=`<div class="paper-header"><div class="paper-code">School Code: ${escapeHtml(code)}</div><div class="paper-school">${escapeHtml(school)}</div><div class="paper-title">${escapeHtml(title)}</div><div class="paper-meta">Subject: ${escapeHtml(subject)} | Class: ${escapeHtml(cls)}<br>Max Marks: ${escapeHtml(marks)} | Duration: ${escapeHtml(duration)}</div></div>`;
+        sections.forEach(s=>{ html+=`<div class="unit"><h4>${escapeHtml(s.h)}</h4>`; if(s.ins) html+=`<div class="instr">${escapeHtml(s.ins)}</div>`; html+=`<div class="qgroup">`;s.qs.forEach(q=>(html+=`<div class="q">${escapeHtml(q)}</div>`));html+=`</div></div>`;});
+        html+=`<div class="pto">P.T.O. →</div></div></div>`;
+        return html;
+      }
+      function getPaperStyles(){
+        return `.paper-root{font-family:Arial,Helvetica,sans-serif;color:#000;background:#fff;}.sheet-inner{padding:10mm 15mm 15mm 15mm;column-count:2;column-gap:5mm;column-rule:1px solid #000;}.paper-header{border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px;text-align:center;}.paper-code{font-size:13px;font-weight:600;margin-bottom:4px;}.paper-school{font-weight:800;font-size:18px}.paper-title{font-weight:700;font-size:14px;margin-top:4px}.paper-meta{font-size:12px;margin-top:6px;line-height:1.4}.unit{break-inside:avoid;margin-bottom:14px}.unit h4{margin:6px 0;font-size:13px;text-decoration:underline;text-align:center;}.instr{font-style:italic;margin-bottom:6px;color:#333;text-align:center;}.q{margin:6px 0;text-align:justify;font-size:13px}.pto {position: absolute;bottom: 8mm;right: 12mm;font-size: 12px;font-weight: bold;}`;
+      }
+      function renderLandscapePreview(){ previewArea.innerHTML=""; const wrapper=document.createElement("div"); wrapper.innerHTML=`<style>${getPaperStyles()}</style>`+buildLandscapeHtml(); previewArea.appendChild(wrapper); previewArea.scrollIntoView({behavior:"smooth",block:"start"}); const allPages = wrapper.querySelectorAll(".paper-root"); if (allPages.length > 0) { const lastPage = allPages[allPages.length - 1]; const pto = lastPage.querySelector(".pto"); if (pto) pto.remove();}}
+      function generatePdfLandscape(){ const wrapper=document.createElement("div"); wrapper.style.position="fixed";wrapper.style.left="-9999px";wrapper.style.top="0"; wrapper.innerHTML=`<style>${getPaperStyles()}</style>`+buildLandscapeHtml(); document.body.appendChild(wrapper); setTimeout(()=>{ const opt={margin:10,filename:"question-paper.pdf",image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:"mm",format:"a4",orientation:"landscape"}}; html2pdf().set(opt).from(wrapper).save().then(()=>{document.body.removeChild(wrapper);});},350);}
+      addBtn.addEventListener("click",()=>addSection());
+      clearBtn.addEventListener("click",()=>{if(confirm("Clear all?")){document.getElementById("paperForm").reset();clearAll();}});
+      fillDemoBtn.addEventListener("click",fillDemo);
+      landscapePreviewBtn.addEventListener("click",()=>{renderLandscapePreview();});
+      landscapePdfBtn.addEventListener("click",()=>generatePdfLandscape());
+      printPreviewBtn.addEventListener("click", printPreviewContent);
+      if(document.querySelectorAll("#sections .section-card").length===0) addSection();
+    })();
+  </script>
+</body>
+</html>

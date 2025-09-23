@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Letterhead Builder | Samarth Public School</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {  background: linear-gradient(135deg, #0f172a, #1e293b);  }
+    .sheet {
+      width: 210mm;
+      min-height: 297mm;
+      background: #fff;
+      margin: auto;
+      padding: 0;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      border-radius: 6px;
+    }
+    @media print {
+      body { background: white; margin: 0; padding: 0; }
+      .no-print { display: none; }
+      .sheet {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        border-radius: 0;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+<body class="p-0 m-0 font-sans">
+
+  <!-- Controls -->
+  <div class="no-print max-w-4xl mx-auto my-6 bg-white shadow-lg p-6 rounded-xl border border-gray-200">
+    <h2 class="text-xl font-bold mb-4 text-gray-700">✍️ Create Your Letter</h2>
+  
+
+    <label class="block mb-4">
+      <span class="text-sm font-medium text-gray-600">Write Content</span>
+      <textarea id="letterContent" 
+                class="mt-2 w-full h-40 border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"></textarea>
+    </label>
+
+    <div class="flex flex-wrap gap-3 mt-3">
+      <button onclick="generatePreview()" 
+              class="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-lg shadow hover:scale-105 transition transform duration-200">
+        🔍 Preview
+      </button>
+      <button onclick="window.print()" 
+              class="px-6 py-2 bg-gradient-to-r from-green-500 to-green-700 text-white rounded-lg shadow hover:scale-105 transition transform duration-200">
+        🖨️ Print
+      </button>
+    </div>
+  </div>
+
+  <!-- Preview Area -->
+  <div class="max-w-4xl mx-auto">
+    <div id="preview" class="sheet">
+      <!-- Header -->
+      <div id="letterHeader" class="text-center relative px-6 py-4">
+        <img id="schoolLogo" src="spsk1.png" alt="Logo" 
+             class="absolute left-6 top-4 w-20 h-20 object-contain"/>
+
+        <div class="font-bold text-lg tracking-wide">SAMARTH PUBLIC SCHOOL KHATI (ENGLISH MEDIUM)</div>
+        <div class="text-sm font-semibold mt-1">(CLASS – NURSERY TO TENTH)</div>
+        <div class="text-xs mt-1 uppercase">RUN BY :- EFFORT FOUNDATION CHHATTISGARH</div>
+        <div class="text-xs mt-1">GADAGHAT ROAD VILLAGE – KHATI, P.O. – KARESARA, BLOCK – SAJA, DIST. – BEMETARA (C.G.)</div>
+        <div class="text-xs mt-1">
+          Pin code - 491335 , Phone No. 9575482080 , 
+          Email: <span class="text-blue-700">samarthpublicschoolkhati2019@gmail.com</span>
+        </div>
+
+        <div class="flex justify-between items-center text-xs font-semibold mt-3 border-b-2 border-gray-800 pb-2">
+          <span>REG. NO. – 2019004</span>
+          <span class="text-red-700 font-bold">CGBSE AFF. 122036</span>
+          <span>UDICE CODE – 22231208307</span>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div id="letterBody" class="mt-6 text-sm leading-6 whitespace-pre-wrap px-6 pb-10"></div>
+    </div>
+  </div>
+
+<script>
+function generatePreview(){
+  const content = document.getElementById("letterContent").value;
+  document.getElementById("letterBody").textContent = content;
+}
+
+// Logo upload
+document.getElementById("logoUpload").addEventListener("change", function(e){
+  const file = e.target.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      document.getElementById("schoolLogo").src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+});
+</script>
+</body>
+</html>

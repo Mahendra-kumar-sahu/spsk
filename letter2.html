@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Letterhead | Samarth Public School</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* A4 size fix */
+    #letterhead {
+      width: 210mm;
+      min-height: 297mm;
+      background: white;
+      margin: auto;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+      border: 4px solid #1e3a8a; /* blue border */
+      border-radius: 12px;
+      position: relative; /* footer ke liye */
+      padding-bottom: 60px; /* footer space */
+    }
+
+    /* Print ke liye */
+    @media print {
+      body {
+        background: white;
+        margin: 0;
+        padding: 0;
+      }
+      #letterhead {
+        margin: 0 auto;
+        border: none;
+        box-shadow: none;
+        page-break-after: always;
+      }
+      #controls {
+        display: none;
+      }
+    }
+
+    /* Content formatting preserve */
+    #previewArea {
+      white-space: pre-wrap;   /* line breaks aur spaces preserve honge */
+      font-family: "Times New Roman", serif;
+    }
+
+    /* Footer fix */
+    .letter-footer {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      padding: 0 30px;
+      display: flex;
+      justify-content: space-between;
+      font-family: "Times New Roman", serif;
+      font-size: 14px;
+      color: #333;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 p-8">
+
+  <!-- Controls -->
+  <div id="controls" class="max-w-6xl mx-auto mb-6">
+    <textarea id="letterContent" rows="6" placeholder="Yahan apna letter content likhiye..." 
+      class="w-full border border-gray-400 rounded-lg p-3 text-gray-800 shadow-sm"></textarea>
+    
+    <div class="flex gap-4 mt-4">
+      <button onclick="previewContent()" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow-md font-semibold">
+        🔍 Preview
+      </button>
+      <button onclick="window.print()" 
+        class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg shadow-md font-semibold">
+        🖨️ Print
+      </button>
+    </div>
+  </div>
+
+  <!-- Letterhead -->
+  <div id="letterhead" class="shadow-xl p-6">
+
+    <!-- Header Section -->
+    <div class="flex justify-between items-center">
+      
+      <!-- Left Section -->
+      <div class="text-left text-sm leading-relaxed text-gray-800 font-medium">
+        <p class="font-bold text-lg">NOHAR SAHU</p>
+        <p class="italic">Director</p>
+        <p>SAMARTH PUBLIC SCHOOL KHATI <span class="font-semibold">President</span></p>
+        <p>EFFORT FOUNDATION CHHATTISGARH</p>
+        <p class="mt-1">📞 9575482080</p>
+        <p>✉️ noharsahu2646@gmail.com</p>
+      </div>
+
+      <!-- Center Logo -->
+      <div class="flex justify-center items-center">
+        <img src="spsk1.png" alt="School Logo" class="h-24 w-24 object-contain">
+      </div>
+
+      <!-- Right Section -->
+      <div class="text-right text-sm leading-relaxed text-gray-800 font-medium">
+        <p class="font-bold">(NGO)</p>
+        <p>EFFORT FOUNDATION CHHATTISGARH</p>
+        <p>Makan no. 77, Ward no. 3</p>
+        <p>Khati, Bemetara (C.G.) 491335</p>
+        <p class="mt-1">Reg. No. <span class="font-semibold">122201729180</span></p>
+        <p>(16/08/2017)</p>
+      </div>
+    </div>
+
+    <!-- Divider Line -->
+    <div class="mt-4 border-t-4 border-blue-900"></div>
+
+    <!-- Body Content -->
+    <div class="p-6 text-gray-700 text-justify min-h-[400px]">
+      <div id="previewArea" class="mt-4"></div>
+    </div>
+
+    <!-- Footer Section -->
+    <div class="letter-footer">
+      <div>Date: ____________</div>
+      <div>Signature: ____________</div>
+    </div>
+
+  </div>
+
+  <script>
+    function previewContent() {
+      let content = document.getElementById("letterContent").value;
+      document.getElementById("previewArea").textContent = content || "⚠️ Koi content likha nahi gaya hai!";
+    }
+  </script>
+
+</body>
+</html>
